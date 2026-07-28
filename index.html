@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🧗‍♂️ 抱石影片紀錄庫 (YouTube 版)</title>
+  <title>🧗‍♂️ 抱石影片紀錄庫</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -42,9 +42,7 @@
         <div>
           <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-800 flex items-center gap-3">
             抱石影片紀錄
-            <span class="text-xs sm:text-sm font-medium bg-red-50 text-red-600 border border-red-200 px-3 py-1 rounded-full">YouTube 頻道同步版</span>
           </h1>
-          <p class="text-xs sm:text-sm text-stone-500 font-normal mt-0.5">高畫質順暢串流 · 自動同步頻道所有播放清單</p>
         </div>
       </div>
 
@@ -64,12 +62,12 @@
   <!-- Main Container -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-    <div id="demo-mode-banner" class="bg-amber-50/80 border border-amber-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-amber-900 text-sm shadow-sm">
+    <div id="demo-mode-banner" class="hidden bg-amber-50/80 border border-amber-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-amber-900 text-sm shadow-sm">
       <div class="flex items-center gap-3.5">
         <i class="fa-solid fa-circle-info text-amber-600 text-2xl flex-shrink-0"></i>
         <div>
           <strong class="font-bold text-amber-950 text-base">目前為「離線預覽範例模式」</strong>
-          <span class="block text-amber-800/90 text-sm mt-0.5">點擊右上角「API 金鑰與頻道設定」輸入您的 Google API Key 與頻道 ID 即可同步所有播放清單！</span>
+          <span class="block text-amber-800/90 text-sm mt-0.5">點擊右上角「API 金鑰與頻道設定」輸入您的 Google API Key 與頻道 ID 即可同步！</span>
         </div>
       </div>
       <button onclick="openConfigModal()" class="whitespace-nowrap bg-amber-600 text-white font-bold px-4 py-2 rounded-xl hover:bg-amber-700 transition text-sm shadow-sm">
@@ -179,8 +177,10 @@
       { id: "dQw4w9WgXcQ", name: "1F 橘石2 挑戰 嘉", folderName: "20260726 B-Plus(太原店)", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" }
     ];
 
-    let apiKey = localStorage.getItem('yt_boulder_api_key') || '';
-    let channelId = localStorage.getItem('yt_boulder_channel_id') || '';
+    // ⭐ 內建預設 API Key 與 頻道 ID (若 localStorage 無自訂設定，則使用預設值)
+    let apiKey = localStorage.getItem('yt_boulder_api_key') || 'AIzaSyAJ_5wsSXdf52qSkMyLYCjVuw57HJ6fipw';
+    let channelId = localStorage.getItem('yt_boulder_channel_id') || 'UCUFu4m0t1GNp4ZKYAnsODjg';
+    
     let rawVideoList = [];
     let parsedVideoList = [];
     
@@ -249,7 +249,7 @@
       renderVideoGrid();
     }
 
-function buildDynamicFiltersUI() {
+    function buildDynamicFiltersUI() {
       const filterWrapper = document.getElementById('filters-wrapper');
       filterWrapper.innerHTML = '';
 
@@ -264,15 +264,16 @@ function buildDynamicFiltersUI() {
       filterConfigs.forEach(cfg => {
         let availableVideos = parsedVideoList;
 
-        // 如果選了特定場館，牆面區域只列出該場館有的牆面
         if (cfg.key === 'wall' && activeFilters.gymDate !== 'ALL') {
           availableVideos = parsedVideoList.filter(v => v.gymDate === activeFilters.gymDate);
         }
 
-        // 取得該欄位的所有不重複選項
-        const uniqueValues = ['ALL', ...new Set(availableVideos.map(v => v[cfg.key]))].sort();
+        // 取得不重複的值並排序
+        const itemValues = [...new Set(availableVideos.map(v => v[cfg.key]))].sort();
+        
+        // ⭐ 關鍵修正：將 'ALL' 永遠固定放在選項陣列的最前端 (首位)
+        const uniqueValues = ['ALL', ...itemValues];
 
-        // 確保目前選取的值依然在可用選項中，否則重置為 ALL
         if (!uniqueValues.includes(activeFilters[cfg.key])) {
           activeFilters[cfg.key] = 'ALL';
         }
@@ -295,14 +296,12 @@ function buildDynamicFiltersUI() {
           select.appendChild(opt);
         });
 
-        // ⭐ 關鍵修復：手動將 DOM select 的 value 與 JavaScript 狀態強行同步
         select.value = activeFilters[cfg.key];
 
         select.addEventListener('change', (e) => {
           const newValue = e.target.value;
           activeFilters[cfg.key] = newValue;
 
-          // 若切換場館，重置牆面區域為 ALL 並僅更新選單 UI
           if (cfg.key === 'gymDate') {
             activeFilters.wall = 'ALL';
             buildDynamicFiltersUI();
@@ -319,6 +318,7 @@ function buildDynamicFiltersUI() {
 
       updateActiveTags();
     }
+
     function updateActiveTags() {
       const tagsContainer = document.getElementById('active-tags');
       tagsContainer.innerHTML = '';
@@ -538,7 +538,7 @@ function buildDynamicFiltersUI() {
       }
     }
 
-    // --- 核心：自動掃描頻道全播放清單 ---
+    // --- YouTube API 讀取邏輯 ---
     async function fetchYouTubeData() {
       if (!apiKey || !channelId) {
         openConfigModal();
@@ -552,14 +552,12 @@ function buildDynamicFiltersUI() {
         rawVideoList = [];
         document.getElementById('channel-info').innerText = `正在讀取頻道播放清單...`;
 
-        // 自動清理欄位中的空白與網址前綴
         let inputVal = channelId.trim();
         if (inputVal.includes('/channel/')) inputVal = inputVal.split('/channel/')[1].split('/')[0];
         if (inputVal.includes('/@')) inputVal = '@' + inputVal.split('/@')[1].split('/')[0];
 
         let targetChannelId = inputVal;
 
-        // 1. 如果填入的是 @handle，先換算成真實的 UCu... Channel ID
         if (inputVal.startsWith('@')) {
           const handle = inputVal.replace('@', '');
           const cResp = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${handle}&key=${apiKey}`);
@@ -567,11 +565,10 @@ function buildDynamicFiltersUI() {
           if (cData.items && cData.items.length > 0) {
             targetChannelId = cData.items[0].id;
           } else {
-            throw new Error(`找不到控鍵號 @${handle} 對應的頻道`);
+            throw new Error(`找不到 @${handle} 對應的頻道`);
           }
         }
 
-        // 2. 向 YouTube API 取得該頻道下「所有播放清單」
         const playlistsUrl = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${targetChannelId}&maxResults=50&key=${apiKey}`;
         const plResp = await fetch(playlistsUrl);
         const plData = await plResp.json();
@@ -585,11 +582,10 @@ function buildDynamicFiltersUI() {
 
         if (playlists.length === 0) {
           document.getElementById('channel-info').innerText = `頻道未找到播放清單`;
-          alert('在您的頻道中找不到公開或不公開的「播放清單」！\n請確定影片已加入播放清單。');
+          alert('在您的頻道中找不到「播放清單」！\n請確認播放清單權限已改為「公開」。');
           return;
         }
 
-        // 3. 逐一讀取每個播放清單（播放清單名稱 = 攀岩館/日期）
         for (const pl of playlists) {
           const playlistTitle = pl.snippet.title;
           const playlistId = pl.id;
