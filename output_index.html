@@ -303,26 +303,38 @@
 
       const filterConfigs = [
         { id: 'gymDate', label: '攀岩館/日期', icon: 'fa-location-dot', key: 'gymDate' },
-        { id: 'wall', label: '牆面區域', icon: 'fa-layer-group', key: 'wall' },
+        { id: 'person', label: '攀爬者', icon: 'fa-user', key: 'person' },
+        { id: 'difficulty', label: '難度', icon: 'fa-gauge-high', key: 'difficulty' },
         { id: 'color', label: '石頭顏色', icon: 'fa-palette', key: 'color' },
-        { id: 'difficulty', label: '難度等級', icon: 'fa-gauge-high', key: 'difficulty' },
-        { id: 'person', label: '攀爬者', icon: 'fa-user', key: 'person' }
+        { id: 'wall', label: '牆面區域', icon: 'fa-layer-group', key: 'wall' }
       ];
 
       filterConfigs.forEach(cfg => {
-        // 從解析後的資料取出唯一值
-        const uniqueValues = ['ALL', ...new Set(parsedVideoList.map(v => v[cfg.key]))].sort();
+        let availableVideos = parsedVideoList;
+
+        // 如果選了特定場館，牆面區域只列出該場館有的牆面
+        if (cfg.key === 'wall' && activeFilters.gymDate !== 'ALL') {
+          availableVideos = parsedVideoList.filter(v => v.gymDate === activeFilters.gymDate);
+        }
+
+        // 取得該欄位的所有不重複選項
+        const uniqueValues = ['ALL', ...new Set(availableVideos.map(v => v[cfg.key]))].sort();
+
+        // 確保目前選取的值依然在可用選項中，否則重置為 ALL
+        if (!uniqueValues.includes(activeFilters[cfg.key])) {
+          activeFilters[cfg.key] = 'ALL';
+        }
 
         const colDiv = document.createElement('div');
-        colDiv.className = 'space-y-1';
+        colDiv.className = 'space-y-1.5';
 
         const label = document.createElement('label');
-        label.className = 'block text-[11px] font-semibold text-slate-400 flex items-center gap-1';
-        label.innerHTML = `<i class="fa-solid ${cfg.icon} text-indigo-400"></i> ${cfg.label}`;
+        label.className = 'block text-sm font-bold text-stone-700 flex items-center gap-1.5';
+        label.innerHTML = `<i class="fa-solid ${cfg.icon} text-stone-500"></i> ${cfg.label}`;
 
         const select = document.createElement('select');
-        select.className = 'w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition cursor-pointer';
-        select.value = activeFilters[cfg.key];
+        select.id = `select-filter-${cfg.key}`;
+        select.className = 'w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-sm font-semibold text-stone-800 focus:outline-none focus:border-stone-400 focus:bg-white transition cursor-pointer shadow-sm';
 
         uniqueValues.forEach(val => {
           const opt = document.createElement('option');
@@ -331,8 +343,19 @@
           select.appendChild(opt);
         });
 
+        // ⭐ 關鍵修復：手動將 DOM select 的 value 與 JavaScript 狀態強行同步
+        select.value = activeFilters[cfg.key];
+
         select.addEventListener('change', (e) => {
-          activeFilters[cfg.key] = e.target.value;
+          const newValue = e.target.value;
+          activeFilters[cfg.key] = newValue;
+
+          // 若切換場館，重置牆面區域為 ALL 並僅更新選單 UI
+          if (cfg.key === 'gymDate') {
+            activeFilters.wall = 'ALL';
+            buildDynamicFiltersUI();
+          }
+
           renderVideoGrid();
           updateActiveTags();
         });
