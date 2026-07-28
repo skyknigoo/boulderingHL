@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,33 +9,40 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
+
     body {
       font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #faf8f5;
       color: #2d3748;
     }
+
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
+
     .custom-scrollbar::-webkit-scrollbar-track {
       background: #f1f0ea;
       border-radius: 4px;
     }
+
     .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #cbd5e1;
       border-radius: 4px;
     }
+
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
   </style>
 </head>
+
 <body class="min-h-screen">
 
   <!-- Header -->
   <header class="bg-white/80 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-30 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div
+      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
       <div class="flex items-center space-x-3.5">
         <div class="bg-red-600 p-3 rounded-2xl text-white shadow-sm">
           <i class="fa-brands fa-youtube text-xl font-normal"></i>
@@ -46,12 +54,14 @@
         </div>
       </div>
 
-      <div style="display: none;" class="flex items-center gap-3 w-full sm:w-auto justify-end">
-        <button id="api-config-btn" onclick="openConfigModal()" class="flex items-center gap-2 bg-stone-100 hover:bg-stone-200/80 text-stone-700 text-sm font-semibold px-4 py-2.5 rounded-xl transition border border-stone-200">
+      <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+        <button style="display: none;" id="api-config-btn" onclick="openConfigModal()"
+          class="flex items-center gap-2 bg-stone-100 hover:bg-stone-200/80 text-stone-700 text-sm font-semibold px-4 py-2.5 rounded-xl transition border border-stone-200">
           <i class="fa-solid fa-key text-amber-600"></i>
           <span>API 金鑰與頻道設定</span>
         </button>
-        <button id="refresh-btn" onclick="fetchYouTubeData()" class="flex items-center gap-2 bg-stone-800 hover:bg-stone-700 text-white text-sm px-5 py-2.5 rounded-xl transition font-bold shadow-sm">
+        <button id="refresh-btn" onclick="fetchYouTubeData()"
+          class="flex items-center gap-2 bg-stone-800 hover:bg-stone-700 text-white text-sm px-5 py-2.5 rounded-xl transition font-bold shadow-sm">
           <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i>
           <span>同步 YT 頻道資料</span>
         </button>
@@ -62,7 +72,8 @@
   <!-- Main Container -->
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
 
-    <div id="demo-mode-banner" class="hidden bg-amber-50/80 border border-amber-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-amber-900 text-sm shadow-sm">
+    <div id="demo-mode-banner"
+      class="hidden bg-amber-50/80 border border-amber-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-amber-900 text-sm shadow-sm">
       <div class="flex items-center gap-3.5">
         <i class="fa-solid fa-circle-info text-amber-600 text-2xl flex-shrink-0"></i>
         <div>
@@ -70,24 +81,29 @@
           <span class="block text-amber-800/90 text-sm mt-0.5">點擊右上角「API 金鑰與頻道設定」輸入您的 Google API Key 與頻道 ID 即可同步！</span>
         </div>
       </div>
-      <button onclick="openConfigModal()" class="whitespace-nowrap bg-amber-600 text-white font-bold px-4 py-2 rounded-xl hover:bg-amber-700 transition text-sm shadow-sm">
+      <button onclick="openConfigModal()"
+        class="whitespace-nowrap bg-amber-600 text-white font-bold px-4 py-2 rounded-xl hover:bg-amber-700 transition text-sm shadow-sm">
         設定頻道資訊
       </button>
     </div>
 
     <!-- Filter Control Panel -->
     <section class="bg-white rounded-2xl p-6 border border-stone-200/80 shadow-sm space-y-6">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-stone-100 pb-5">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-stone-100 pb-5">
         <h2 class="text-base sm:text-lg font-bold text-stone-700 tracking-wide flex items-center gap-2">
           <i class="fa-solid fa-sliders text-stone-500 text-lg"></i> 影片多維度動態篩選
         </h2>
-        
+
         <div class="flex items-center gap-3 w-full md:w-auto">
           <div class="relative flex-1 md:w-72">
-            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm"></i>
-            <input type="text" id="search-input" oninput="handleSearch()" placeholder="搜尋關鍵字 (如：桃石, 嘉...)" class="w-full bg-stone-50 border border-stone-200 rounded-xl pl-10 pr-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-400 focus:bg-white transition">
+            <i
+              class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm"></i>
+            <input type="text" id="search-input" oninput="handleSearch()" placeholder="搜尋關鍵字 (如：桃石, 嘉...)"
+              class="w-full bg-stone-50 border border-stone-200 rounded-xl pl-10 pr-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-400 focus:bg-white transition">
           </div>
-          <button onclick="resetFilters()" class="text-sm font-medium text-stone-600 hover:text-stone-900 flex items-center gap-2 px-3.5 py-2 rounded-xl border border-stone-200 hover:border-stone-300 bg-stone-50 transition">
+          <button onclick="resetFilters()"
+            class="text-sm font-medium text-stone-600 hover:text-stone-900 flex items-center gap-2 px-3.5 py-2 rounded-xl border border-stone-200 hover:border-stone-300 bg-stone-50 transition">
             <i class="fa-solid fa-rotate-left text-xs"></i> 重置篩選
           </button>
         </div>
@@ -95,7 +111,8 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4" id="filters-wrapper"></div>
 
-      <div id="active-tags-container" class="flex flex-wrap items-center gap-2 pt-1 text-sm text-stone-600 min-h-[32px]">
+      <div id="active-tags-container"
+        class="flex flex-wrap items-center gap-2 pt-1 text-sm text-stone-600 min-h-[32px]">
         <span class="font-medium text-stone-400">已選條件：</span>
         <div id="active-tags" class="flex flex-wrap gap-2"></div>
       </div>
@@ -103,7 +120,8 @@
 
     <!-- Stats Bar -->
     <div class="flex justify-between items-center text-sm font-medium text-stone-500 px-1">
-      <div>共顯示 <span id="displayed-count" class="font-bold text-stone-800 text-base">0</span> / <span id="total-count" class="font-bold text-stone-800 text-base">0</span> 支影片</div>
+      <div>共顯示 <span id="displayed-count" class="font-bold text-stone-800 text-base">0</span> / <span id="total-count"
+          class="font-bold text-stone-800 text-base">0</span> 支影片</div>
       <div id="channel-info" class="text-stone-400 truncate max-w-xs sm:max-w-md">頻道狀態: 未連線</div>
     </div>
 
@@ -113,26 +131,37 @@
   </main>
 
   <!-- Video Modal -->
-  <div id="video-modal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-4 transition-all duration-300">
-    <div id="modal-container" class="bg-white border border-stone-200 rounded-2xl overflow-hidden max-w-4xl w-full shadow-2xl relative flex flex-col max-h-[92vh] transition-all duration-300">
+  <div id="video-modal"
+    class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-4 transition-all duration-300">
+    <div id="modal-container"
+      class="bg-white border border-stone-200 rounded-2xl overflow-hidden max-w-4xl w-full shadow-2xl relative flex flex-col max-h-[92vh] transition-all duration-300">
       <div class="p-4 border-b border-stone-100 flex justify-between items-center bg-stone-50/80">
         <div id="modal-title" class="font-bold text-stone-800 text-base sm:text-lg truncate">影片播放</div>
         <div class="flex items-center gap-2">
           <div class="flex bg-stone-200/60 p-1 rounded-xl text-xs font-semibold">
-            <button onclick="resizeModal('small')" class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white">小</button>
-            <button onclick="resizeModal('medium')" class="px-2.5 py-1 rounded-lg text-stone-900 font-bold bg-white shadow-sm">中</button>
-            <button onclick="resizeModal('large')" class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white">大</button>
-            <button onclick="resizeModal('full')" class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white"><i class="fa-solid fa-expand"></i></button>
+            <button onclick="resizeModal('small')"
+              class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white">小</button>
+            <button onclick="resizeModal('medium')"
+              class="px-2.5 py-1 rounded-lg text-stone-900 font-bold bg-white shadow-sm">中</button>
+            <button onclick="resizeModal('large')"
+              class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white">大</button>
+            <button onclick="resizeModal('full')" class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white"><i
+                class="fa-solid fa-expand"></i></button>
           </div>
-          <button onclick="closeVideoModal()" class="text-stone-400 hover:text-stone-700 p-2 rounded-xl hover:bg-stone-100">
+          <button onclick="closeVideoModal()"
+            class="text-stone-400 hover:text-stone-700 p-2 rounded-xl hover:bg-stone-100">
             <i class="fa-solid fa-xmark text-2xl"></i>
           </button>
         </div>
       </div>
       <div class="relative w-full aspect-video bg-black flex-shrink-0">
-        <iframe id="modal-iframe" src="" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        <iframe id="modal-iframe" src="" class="w-full h-full border-0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
       </div>
-      <div id="modal-footer" class="p-4 bg-stone-50 border-t border-stone-100 text-sm text-stone-700 flex flex-wrap gap-2 items-center justify-between"></div>
+      <div id="modal-footer"
+        class="p-4 bg-stone-50 border-t border-stone-100 text-sm text-stone-700 flex flex-wrap gap-2 items-center justify-between">
+      </div>
       <div class="p-4 bg-white border-t border-stone-100 space-y-3 overflow-y-auto custom-scrollbar flex-1">
         <h4 class="text-sm font-bold text-stone-700 flex items-center gap-2">
           <i class="fa-solid fa-users-viewfinder text-stone-500"></i> 相同路線的其他攀爬者影片：
@@ -143,7 +172,8 @@
   </div>
 
   <!-- Config Modal -->
-  <div id="config-modal" class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+  <div id="config-modal"
+    class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
     <div class="bg-white border border-stone-200 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative">
       <div class="flex justify-between items-center border-b border-stone-100 pb-3">
         <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2">
@@ -156,17 +186,21 @@
       <div class="space-y-4 text-sm text-stone-700">
         <div>
           <label class="block mb-1.5 font-semibold text-stone-800">Google API Key</label>
-          <input type="password" id="api-key-input" placeholder="AIzaSy..." class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-stone-800 text-sm focus:outline-none focus:border-stone-400 font-mono">
+          <input type="password" id="api-key-input" placeholder="AIzaSy..."
+            class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-stone-800 text-sm focus:outline-none focus:border-stone-400 font-mono">
         </div>
         <div>
           <label class="block mb-1.5 font-semibold text-stone-800">YouTube 頻道 ID 或 @Handle</label>
-          <input type="text" id="channel-id-input" placeholder="例如：UCUFu4m0t1GNp4ZKYAnsODJg 或 @skykingoo" class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-stone-800 text-sm focus:outline-none focus:border-stone-400 font-mono">
+          <input type="text" id="channel-id-input" placeholder="例如：UCUFu4m0t1GNp4ZKYAnsODJg 或 @skykingoo"
+            class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-stone-800 text-sm focus:outline-none focus:border-stone-400 font-mono">
           <p class="text-xs text-stone-400 mt-1">程式會自動掃描該頻道下「所有播放清單」當作場館紀錄</p>
         </div>
       </div>
       <div class="flex justify-end gap-3 pt-2">
-        <button onclick="closeConfigModal()" class="px-5 py-2.5 bg-stone-100 hover:bg-stone-200 rounded-xl text-sm font-semibold transition">取消</button>
-        <button onclick="saveConfig()" class="px-5 py-2.5 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-sm font-bold transition">儲存並同步</button>
+        <button onclick="closeConfigModal()"
+          class="px-5 py-2.5 bg-stone-100 hover:bg-stone-200 rounded-xl text-sm font-semibold transition">取消</button>
+        <button onclick="saveConfig()"
+          class="px-5 py-2.5 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-sm font-bold transition">儲存並同步</button>
       </div>
     </div>
   </div>
@@ -180,10 +214,10 @@
     // ⭐ 內建預設 API Key 與 頻道 ID (若 localStorage 無自訂設定，則使用預設值)
     let apiKey = localStorage.getItem('yt_boulder_api_key') || 'AIzaSyAJ_5wsSXdf52qSkMyLYCjVuw57HJ6fipw';
     let channelId = localStorage.getItem('yt_boulder_channel_id') || 'UCUFu4m0t1GNp4ZKYAnsODjg';
-    
+
     let rawVideoList = [];
     let parsedVideoList = [];
-    
+
     let activeFilters = { gymDate: 'ALL', person: 'ALL', difficulty: 'ALL', color: 'ALL', wall: 'ALL' };
     let searchQuery = '';
 
@@ -224,7 +258,7 @@
       const wall = parts[0] || '未分類牆面';
       const color = parts[1] || '未分類顏色';
       const difficulty = parts[2] || '未分類難度';
-      
+
       let person = parts[3] || '未指定人名';
       if (person.toLowerCase() === 'irene') person = 'Irene';
 
@@ -270,7 +304,7 @@
 
         // 取得不重複的值並排序
         const itemValues = [...new Set(availableVideos.map(v => v[cfg.key]))].sort();
-        
+
         // ⭐ 關鍵修正：將 'ALL' 永遠固定放在選項陣列的最前端 (首位)
         const uniqueValues = ['ALL', ...itemValues];
 
@@ -438,7 +472,7 @@
 
       document.getElementById('modal-title').innerText = video.fullName;
       document.getElementById('modal-iframe').src = video.embedUrl;
-      
+
       const footer = document.getElementById('modal-footer');
       const badgeStyle = colorStyleMap[video.color] || 'bg-stone-100 text-stone-700 border-stone-200';
 
@@ -463,7 +497,7 @@
       const grid = document.getElementById('same-route-grid');
       grid.innerHTML = '';
 
-      const sameRoute = parsedVideoList.filter(v => 
+      const sameRoute = parsedVideoList.filter(v =>
         v.gymDate === currentVideo.gymDate &&
         v.wall === currentVideo.wall &&
         v.color === currentVideo.color &&
@@ -623,4 +657,5 @@
     }
   </script>
 </body>
+
 </html>
