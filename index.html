@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🧗‍♂️ 抱石影片紀錄庫 (Bouldering Video Vault)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+    }
+    .color-badge {
+      transition: all 0.2s ease;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-slate-800/80 backdrop-blur-md border-b border-slate-700 sticky top-0 z-30 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="bg-indigo-600 p-2.5 rounded-xl text-white shadow-md shadow-indigo-500/20">
+          <i class="fa-solid font-bold text-xl fa-mountain font-normal"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-wide text-white flex items-center gap-2">
+            抱石影片紀錄庫
+            <span class="text-xs font-normal bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full">v2.0</span>
+          </h1>
+          <p class="text-xs text-slate-400">Google Drive 影片動態分類與整合系統</p>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+        <button id="api-config-btn" onclick="openConfigModal()" class="flex items-center gap-2 bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs px-3 py-2 rounded-lg transition border border-slate-600">
+          <i class="fa-solid fa-key text-amber-400"></i>
+          <span>API 金鑰設定</span>
+        </button>
+        <button id="refresh-btn" onclick="fetchDriveData()" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-lg transition font-medium shadow-md shadow-indigo-600/30">
+          <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i>
+          <span>同步雲端資料</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+
+    <!-- Config Alert Notice -->
+    <div id="demo-mode-banner" class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-200 text-xs">
+      <div class="flex items-center gap-3">
+        <i class="fa-solid fa-circle-info text-amber-400 text-lg flex-shrink-0"></i>
+        <div>
+          <strong class="font-semibold text-amber-300">目前為「離線預覽範例模式」</strong>
+          <span class="block text-amber-200/80">已預載圖片中顯示的 15 支範例影片檔名格式。點擊右上角「API 金鑰設定」輸入 Google API Key 後即可同步實際 Google Drive 資料夾！</span>
+        </div>
+      </div>
+      <button onclick="openConfigModal()" class="whitespace-nowrap bg-amber-500 text-slate-950 font-bold px-3 py-1.5 rounded-md hover:bg-amber-400 transition text-xs">
+        設定 API Key
+      </button>
+    </div>
+
+    <!-- Filter Control Panel -->
+    <section class="bg-slate-800/90 rounded-2xl p-5 border border-slate-700/80 shadow-xl space-y-5">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-slate-700/60 pb-4">
+        <h2 class="text-sm font-bold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+          <i class="fa-solid fa-filter text-indigo-400"></i> 影片多維度動態篩選器
+        </h2>
+        
+        <!-- Search Input & Reset -->
+        <div class="flex items-center gap-3 w-full md:w-auto">
+          <div class="relative flex-1 md:w-64">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="search-input" oninput="handleSearch()" placeholder="搜尋關鍵字 (如：綠石, 峰...)" class="w-full bg-slate-900/90 border border-slate-700 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+          </div>
+          <button onclick="resetFilters()" class="text-xs text-slate-400 hover:text-indigo-300 flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-700 hover:border-slate-600 bg-slate-900/50 transition">
+            <i class="fa-solid fa-rotate-left"></i> 重置篩選
+          </button>
+        </div>
+      </div>
+
+      <!-- Dynamic Filter Dropdowns Grid -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3" id="filters-wrapper">
+        <!-- JS dynamically populates dropdowns here: Gym/Date, Wall, Color, Difficulty, Person -->
+      </div>
+
+      <!-- Active Filter Tags Display -->
+      <div id="active-tags-container" class="flex flex-wrap items-center gap-2 pt-2 text-xs text-slate-400 min-h-[28px]">
+        <span>已選擇條件：</span>
+        <div id="active-tags" class="flex flex-wrap gap-2"></div>
+      </div>
+    </section>
+
+    <!-- Stats Bar -->
+    <div class="flex justify-between items-center text-xs text-slate-400 px-1">
+      <div>顯示 <span id="displayed-count" class="font-bold text-indigo-400">0</span> / <span id="total-count" class="font-bold text-slate-200">0</span> 支影片</div>
+      <div id="folder-info" class="text-slate-500 truncate max-w-xs sm:max-w-md">目標目錄 ID: 1m7HSutoNkv...</div>
+    </div>
+
+    <!-- Video Grid -->
+    <section id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <!-- Video cards rendered by JS -->
+    </section>
+
+  </main>
+
+  <!-- Video Modal -->
+  <div id="video-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl overflow-hidden max-w-4xl w-full shadow-2xl relative flex flex-col max-h-[90vh]">
+      <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
+        <div id="modal-title" class="font-bold text-slate-200 text-sm sm:text-base truncate pr-4">影片播放</div>
+        <button onclick="closeVideoModal()" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-700 transition">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
+      <div class="relative w-full aspect-video bg-black flex-1">
+        <iframe id="modal-iframe" src="" class="w-full h-full border-0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+      </div>
+      <div id="modal-footer" class="p-4 bg-slate-900/80 border-t border-slate-700/60 text-xs text-slate-300 flex flex-wrap gap-2 items-center justify-between">
+        <!-- Metadata pills inside modal -->
+      </div>
+    </div>
+  </div>
+
+  <!-- API Config Modal -->
+  <div id="config-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 class="text-base font-bold text-white flex items-center gap-2">
+          <i class="fa-solid fa-key text-amber-400"></i> Google Drive API 設定
+        </h3>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs text-slate-300">
+        <div>
+          <label class="block mb-1.5 font-medium text-slate-200">Google Drive API Key</label>
+          <input type="password" id="api-key-input" placeholder="AIzaSy..." class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-xs focus:outline-none focus:border-indigo-500 font-mono">
+          <p class="text-[11px] text-slate-500 mt-1">此 Key 將加密存於您瀏覽器的 LocalStorage 中，不會傳送至任何第三方伺服器。</p>
+        </div>
+
+        <div>
+          <label class="block mb-1.5 font-medium text-slate-200">Google Drive 資料夾 ID</label>
+          <input type="text" id="folder-id-input" value="1m7HSutoNkvZnOQMrgEd_szWQSQVhzCJ1" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-slate-100 text-xs focus:outline-none focus:border-indigo-500 font-mono">
+          <p class="text-[11px] text-slate-500 mt-1">對應您的 /抱石 雲端硬碟根目錄 ID</p>
+        </div>
+
+        <div class="bg-indigo-950/40 border border-indigo-800/40 rounded-lg p-3 space-y-1 text-slate-400 text-[11px]">
+          <strong class="text-indigo-300 font-semibold">💡 檔名解析規則說明：</strong>
+          <p>1. 影片檔名請符合：<code class="bg-slate-900 text-amber-300 px-1 py-0.5 rounded">牆面 石頭顏色 難度 人名.mp4</code>（以空格區隔）</p>
+          <p>2. 資料夾架構：<code class="bg-slate-900 text-indigo-300 px-1 py-0.5 rounded">/抱石/日期+攀岩館名字/影片.mp4</code></p>
+          <p>系統會自動讀取子資料夾名稱作為「日期與攀岩館」分類！</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-2">
+        <button onclick="closeConfigModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-medium transition">取消</button>
+        <button onclick="saveConfig()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-medium transition shadow-md shadow-indigo-600/30">儲存並同步</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- 預載範例資料 (取自使用者提供之圖片檔名) ---
+    const DEMO_FOLDER_NAME = "20240520 原岩攀岩館";
+    const DEMO_VIDEOS = [
+      { id: "demo_1", name: "1F 紅石 挑戰 嘉.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_2", name: "1F 綠石 挑戰 峰.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_3", name: "1F 綠石 挑戰 嘉.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_4", name: "1F 橘石 挑戰 峰.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_5", name: "1F 橘石 挑戰 嘉.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_6", name: "1F 橘石 挑戰 Irene.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_7", name: "1F 橘石2 挑戰 峰.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_8", name: "1F 橘石2 挑戰 嘉.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_9", name: "1F 藍石 挑戰 峰.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_10", name: "1F 藍石 挑戰 嘉.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_11", name: "1F 藍石 挑戰 irene.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_12", name: "1F 藍石2 挑戰 峰.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_13", name: "1F 藍石2 挑戰 嘉.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_14", name: "1F 藍石2 挑戰 Irene.mp4", folderName: DEMO_FOLDER_NAME },
+      { id: "demo_15", name: "2F 淺黃石 挑戰 峰.mp4", folderName: DEMO_FOLDER_NAME }
+    ];
+
+    // --- 全域變數 ---
+    let apiKey = localStorage.getItem('boulder_api_key') || '';
+    let folderId = localStorage.getItem('boulder_folder_id') || '1m7HSutoNkvZnOQMrgEd_szWQSQVhzCJ1';
+    let rawVideoList = [];
+    let parsedVideoList = [];
+    
+    // 篩選條件狀態
+    let activeFilters = {
+      gymDate: 'ALL',
+      wall: 'ALL',
+      color: 'ALL',
+      difficulty: 'ALL',
+      person: 'ALL'
+    };
+    let searchQuery = '';
+
+    // 石頭顏色對應 Badge 樣式對照表
+    const colorStyleMap = {
+      '紅石': 'bg-red-500/20 text-red-300 border-red-500/40',
+      '綠石': 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+      '橘石': 'bg-orange-500/20 text-orange-300 border-orange-500/40',
+      '橘石2': 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+      '藍石': 'bg-blue-500/20 text-blue-300 border-blue-500/40',
+      '藍石2': 'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
+      '淺黃石': 'bg-yellow-500/20 text-yellow-300 border-yellow-500/40',
+      '黃石': 'bg-yellow-400/20 text-yellow-200 border-yellow-400/40',
+      '黑石': 'bg-slate-700 text-slate-200 border-slate-500',
+      '紫石': 'bg-purple-500/20 text-purple-300 border-purple-500/40',
+      '粉紅石': 'bg-pink-500/20 text-pink-300 border-pink-500/40',
+      '白石': 'bg-slate-200/20 text-slate-100 border-slate-300/40'
+    };
+
+    // --- 初始化流程 ---
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('api-key-input').value = apiKey;
+      document.getElementById('folder-id-input').value = folderId;
+
+      if (apiKey) {
+        document.getElementById('demo-mode-banner').classList.add('hidden');
+        fetchDriveData();
+      } else {
+        // 使用 Demo 範例資料
+        loadDemoData();
+      }
+    });
+
+    // --- 載入範例資料 ---
+    function loadDemoData() {
+      rawVideoList = DEMO_VIDEOS;
+      processVideoData();
+    }
+
+    // --- 檔名與路徑解析器 (Core Parser) ---
+    // 規則：1.牆面 2.石頭顏色 3.難度 4.人名 (以空格區隔)
+    function parseFileNameAndPath(item) {
+      // 去除副檔名 (.mp4, .mov, etc.)
+      const nameWithoutExt = item.name.replace(/\.[^/.]+$/, "");
+      
+      // 以一個或多個空格拆解
+      const parts = nameWithoutExt.split(/\s+/);
+
+      const wall = parts[0] || '未分類牆面';
+      const color = parts[1] || '未分類顏色';
+      const difficulty = parts[2] || '未分類難度';
+      
+      // 人名可能包含英文大小寫，統一去掉前後空格
+      let person = parts[3] || '未指定人名';
+      // 規範常見大小寫，例如 irene -> Irene
+      if (person.toLowerCase() === 'irene') person = 'Irene';
+
+      const gymDate = item.folderName || '根目錄';
+
+      return {
+        id: item.id,
+        fullName: item.name,
+        gymDate: gymDate,
+        wall: wall,
+        color: color,
+        difficulty: difficulty,
+        person: person,
+        embedUrl: item.id.startsWith('demo_') 
+          ? `https://www.youtube.com/embed/dQw4w9WgXcQ` // Demo 預設 placeholder 影片
+          : `https://drive.google.com/file/d/${item.id}/preview`
+      };
+    }
+
+    // 處理與解析清單
+    function processVideoData() {
+      parsedVideoList = rawVideoList.map(item => parseFileNameAndPath(item));
+      buildDynamicFiltersUI();
+      renderVideoGrid();
+    }
+
+    // --- 動態建立多維度篩選器選單 (Dynamic Category Generator) ---
+    function buildDynamicFiltersUI() {
+      const filterWrapper = document.getElementById('filters-wrapper');
+      filterWrapper.innerHTML = '';
+
+      const filterConfigs = [
+        { id: 'gymDate', label: '攀岩館/日期', icon: 'fa-location-dot', key: 'gymDate' },
+        { id: 'wall', label: '牆面區域', icon: 'fa-layer-group', key: 'wall' },
+        { id: 'color', label: '石頭顏色', icon: 'fa-palette', key: 'color' },
+        { id: 'difficulty', label: '難度等級', icon: 'fa-gauge-high', key: 'difficulty' },
+        { id: 'person', label: '攀爬者', icon: 'fa-user', key: 'person' }
+      ];
+
+      filterConfigs.forEach(cfg => {
+        // 從解析後的資料取出唯一值
+        const uniqueValues = ['ALL', ...new Set(parsedVideoList.map(v => v[cfg.key]))].sort();
+
+        const colDiv = document.createElement('div');
+        colDiv.className = 'space-y-1';
+
+        const label = document.createElement('label');
+        label.className = 'block text-[11px] font-semibold text-slate-400 flex items-center gap-1';
+        label.innerHTML = `<i class="fa-solid ${cfg.icon} text-indigo-400"></i> ${cfg.label}`;
+
+        const select = document.createElement('select');
+        select.className = 'w-full bg-slate-900 border border-slate-700/80 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500 transition cursor-pointer';
+        select.value = activeFilters[cfg.key];
+
+        uniqueValues.forEach(val => {
+          const opt = document.createElement('option');
+          opt.value = val;
+          opt.textContent = val === 'ALL' ? `全部 ${cfg.label}` : val;
+          select.appendChild(opt);
+        });
+
+        select.addEventListener('change', (e) => {
+          activeFilters[cfg.key] = e.target.value;
+          renderVideoGrid();
+          updateActiveTags();
+        });
+
+        colDiv.appendChild(label);
+        colDiv.appendChild(select);
+        filterWrapper.appendChild(colDiv);
+      });
+
+      updateActiveTags();
+    }
+
+    // 更新已選標籤條
+    function updateActiveTags() {
+      const tagsContainer = document.getElementById('active-tags');
+      tagsContainer.innerHTML = '';
+
+      let hasActive = false;
+      const labelNames = {
+        gymDate: '場館',
+        wall: '牆面',
+        color: '顏色',
+        difficulty: '難度',
+        person: '人名'
+      };
+
+      Object.keys(activeFilters).forEach(k => {
+        if (activeFilters[k] !== 'ALL') {
+          hasActive = true;
+          const tag = document.createElement('span');
+          tag.className = 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-md text-[11px] flex items-center gap-1.5';
+          tag.innerHTML = `${labelNames[k]}: <strong>${activeFilters[k]}</strong> <i class="fa-solid fa-xmark cursor-pointer hover:text-white" onclick="clearSingleFilter('${k}')"></i>`;
+          tagsContainer.appendChild(tag);
+        }
+      });
+
+      if (!hasActive) {
+        tagsContainer.innerHTML = `<span class="text-slate-500 italic text-[11px]">全部分類</span>`;
+      }
+    }
+
+    function clearSingleFilter(key) {
+      activeFilters[key] = 'ALL';
+      buildDynamicFiltersUI();
+      renderVideoGrid();
+    }
+
+    function resetFilters() {
+      activeFilters = { gymDate: 'ALL', wall: 'ALL', color: 'ALL', difficulty: 'ALL', person: 'ALL' };
+      document.getElementById('search-input').value = '';
+      searchQuery = '';
+      buildDynamicFiltersUI();
+      renderVideoGrid();
+    }
+
+    function handleSearch() {
+      searchQuery = document.getElementById('search-input').value.trim().toLowerCase();
+      renderVideoGrid();
+    }
+
+    // --- 渲染影片卡片網格 ---
+    function renderVideoGrid() {
+      const grid = document.getElementById('video-grid');
+      grid.innerHTML = '';
+
+      // 過濾邏輯
+      const filtered = parsedVideoList.filter(video => {
+        const matchGym = activeFilters.gymDate === 'ALL' || video.gymDate === activeFilters.gymDate;
+        const matchWall = activeFilters.wall === 'ALL' || video.wall === activeFilters.wall;
+        const matchColor = activeFilters.color === 'ALL' || video.color === activeFilters.color;
+        const matchDiff = activeFilters.difficulty === 'ALL' || video.difficulty === activeFilters.difficulty;
+        const matchPerson = activeFilters.person === 'ALL' || video.person === activeFilters.person;
+        
+        const matchSearch = !searchQuery || video.fullName.toLowerCase().includes(searchQuery) || video.gymDate.toLowerCase().includes(searchQuery);
+
+        return matchGym && matchWall && matchColor && matchDiff && matchPerson && matchSearch;
+      });
+
+      document.getElementById('displayed-count').innerText = filtered.length;
+      document.getElementById('total-count').innerText = parsedVideoList.length;
+
+      if (filtered.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full text-center py-16 bg-slate-800/40 rounded-2xl border border-dashed border-slate-700">
+            <i class="fa-solid fa-film text-4xl text-slate-600 mb-3"></i>
+            <p class="text-slate-400 font-medium text-sm">找不到符合條件的抱石影片</p>
+            <p class="text-slate-500 text-xs mt-1">請嘗試調整篩選器條件或搜尋關鍵字</p>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(video => {
+        const badgeStyle = colorStyleMap[video.color] || 'bg-slate-700 text-slate-300 border-slate-600';
+
+        const card = document.createElement('div');
+        card.className = 'bg-slate-800/80 border border-slate-700/80 rounded-xl overflow-hidden hover:border-slate-500 transition duration-200 flex flex-col group shadow-lg';
+
+        card.innerHTML = `
+          <!-- Preview Iframe / Thumbnail Wrapper -->
+          <div class="relative w-full aspect-video bg-black overflow-hidden group-hover:opacity-95 transition">
+            <iframe src="${video.embedUrl}" class="w-full h-full border-0 pointer-events-none" loading="lazy"></iframe>
+            <div class="absolute inset-0 bg-slate-950/30 group-hover:bg-slate-950/10 transition flex items-center justify-center cursor-pointer" onclick="openVideoModal('${video.id}')">
+              <div class="w-12 h-12 rounded-full bg-indigo-600/90 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition duration-200">
+                <i class="fa-solid fa-play text-base ml-1"></i>
+              </div>
+            </div>
+            <!-- Top Tag: Wall -->
+            <div class="absolute top-2.5 left-2.5 bg-slate-900/80 backdrop-blur-md text-slate-200 text-[11px] font-bold px-2.5 py-1 rounded-md border border-slate-700">
+              ${video.wall}
+            </div>
+          </div>
+
+          <!-- Content Info -->
+          <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+            <div>
+              <div class="text-[11px] text-indigo-400 font-medium flex items-center gap-1 mb-1">
+                <i class="fa-solid fa-location-dot"></i> ${video.gymDate}
+              </div>
+              <h3 class="font-bold text-slate-100 text-sm line-clamp-1 group-hover:text-indigo-300 transition" title="${video.fullName}">
+                ${video.fullName}
+              </h3>
+            </div>
+
+            <!-- Tags -->
+            <div class="flex flex-wrap gap-1.5 pt-1">
+              <span class="text-[11px] px-2 py-0.5 rounded border ${badgeStyle} font-medium">
+                ${video.color}
+              </span>
+              <span class="text-[11px] px-2 py-0.5 rounded border bg-slate-700/60 text-slate-300 border-slate-600 font-medium">
+                ${video.difficulty}
+              </span>
+              <span class="text-[11px] px-2 py-0.5 rounded border bg-emerald-500/10 text-emerald-300 border-emerald-500/30 font-medium flex items-center gap-1">
+                <i class="fa-solid fa-user text-[9px]"></i> ${video.person}
+              </span>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    // --- Modal Controls ---
+    function openVideoModal(id) {
+      const video = parsedVideoList.find(v => v.id === id);
+      if (!video) return;
+
+      document.getElementById('modal-title').innerText = video.fullName;
+      document.getElementById('modal-iframe').src = video.embedUrl;
+      
+      const footer = document.getElementById('modal-footer');
+      const badgeStyle = colorStyleMap[video.color] || 'bg-slate-700 text-slate-300 border-slate-600';
+
+      footer.innerHTML = `
+        <div class="flex flex-wrap gap-2 items-center">
+          <span class="bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700"><i class="fa-solid fa-location-dot text-indigo-400"></i> ${video.gymDate}</span>
+          <span class="bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700">${video.wall}</span>
+          <span class="px-2 py-1 rounded border ${badgeStyle}">${video.color}</span>
+          <span class="bg-slate-800 text-slate-300 px-2 py-1 rounded border border-slate-700">${video.difficulty}</span>
+          <span class="bg-emerald-500/20 text-emerald-300 px-2 py-1 rounded border border-emerald-500/30"><i class="fa-solid fa-user text-xs"></i> ${video.person}</span>
+        </div>
+        <a href="https://drive.google.com/file/d/${video.id}/view" target="_blank" class="text-indigo-400 hover:underline flex items-center gap-1">
+          前往 Google Drive 開啟 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+        </a>
+      `;
+
+      document.getElementById('video-modal').classList.remove('hidden');
+    }
+
+    function closeVideoModal() {
+      document.getElementById('video-modal').classList.add('hidden');
+      document.getElementById('modal-iframe').src = '';
+    }
+
+    function openConfigModal() {
+      document.getElementById('config-modal').classList.remove('hidden');
+    }
+
+    function closeConfigModal() {
+      document.getElementById('config-modal').classList.add('hidden');
+    }
+
+    function saveConfig() {
+      apiKey = document.getElementById('api-key-input').value.trim();
+      folderId = document.getElementById('folder-id-input').value.trim() || '1m7HSutoNkvZnOQMrgEd_szWQSQVhzCJ1';
+
+      localStorage.setItem('boulder_api_key', apiKey);
+      localStorage.setItem('boulder_folder_id', folderId);
+
+      closeConfigModal();
+
+      if (apiKey) {
+        document.getElementById('demo-mode-banner').classList.add('hidden');
+        fetchDriveData();
+      } else {
+        document.getElementById('demo-mode-banner').classList.remove('hidden');
+        loadDemoData();
+      }
+    }
+
+    // --- Google Drive API 連線與遞迴擷取 (Drive Fetching) ---
+    async function fetchDriveData() {
+      if (!apiKey) {
+        openConfigModal();
+        return;
+      }
+
+      const refreshIcon = document.getElementById('refresh-icon');
+      refreshIcon.classList.add('fa-spin');
+
+      try {
+        rawVideoList = [];
+        document.getElementById('folder-info').innerText = `正在讀取雲端硬碟 (ID: ${folderId})...`;
+
+        // Step 1: 取得根目錄內所有「日期+攀岩館名字」子資料夾
+        const subFoldersUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType='application/vnd.google-apps.folder'+and+trashed=false&key=${apiKey}&fields=files(id,name)`;
+        const folderResp = await fetch(subFoldersUrl);
+        const folderData = await folderResp.json();
+
+        let foldersToScan = [];
+        if (folderData.files && folderData.files.length > 0) {
+          foldersToScan = folderData.files;
+        } else {
+          // 如果根目錄下沒有子資料夾，就掃描根目錄本身
+          foldersToScan = [{ id: folderId, name: '預設目錄' }];
+        }
+
+        // Step 2: 掃描每個資料夾內的影片
+        for (const f of foldersToScan) {
+          const videoUrl = `https://www.googleapis.com/drive/v3/files?q='${f.id}'+in+parents+and+mimeType+contains+'video/'+and+trashed=false&key=${apiKey}&fields=files(id,name)&pageSize=100`;
+          const vResp = await fetch(videoUrl);
+          const vData = await vResp.json();
+
+          if (vData.files) {
+            vData.files.forEach(file => {
+              rawVideoList.push({
+                id: file.id,
+                name: file.name,
+                folderName: f.name
+              });
+            });
+          }
+        }
+
+        // 也順便檢查根目錄直接放的影片
+        const rootVideoUrl = `https://www.googleapis.com/drive/v3/files?q='${folderId}'+in+parents+and+mimeType+contains+'video/'+and+trashed=false&key=${apiKey}&fields=files(id,name)&pageSize=100`;
+        const rootVResp = await fetch(rootVideoUrl);
+        const rootVData = await rootVResp.json();
+        if (rootVData.files) {
+          rootVData.files.forEach(file => {
+            // 避免重複
+            if (!rawVideoList.some(v => v.id === file.id)) {
+              rawVideoList.push({
+                id: file.id,
+                name: file.name,
+                folderName: '根目錄'
+              });
+            }
+          });
+        }
+
+        document.getElementById('folder-info').innerText = `成功同步 ${rawVideoList.length} 支影片`;
+        processVideoData();
+
+      } catch (err) {
+        console.error('Fetch Drive API Error:', err);
+        alert('存取 Google Drive API 失敗，請檢查 API Key 是否正確且已啟用 Drive API 權限！');
+      } finally {
+        refreshIcon.classList.remove('fa-spin');
+      }
+    }
+  </script>
+</body>
+</html>
