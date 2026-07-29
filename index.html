@@ -129,11 +129,11 @@
 
   </main>
 
-  <!-- 💡 拓寬且長度拉長的 Shorts 影片 Modal (寬 max-w-4xl，高長度 h-[90vh]) -->
+  <!-- 大視窗 Modal -->
   <div id="video-modal" class="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5 transition-all duration-300">
-    <div id="modal-container" class="bg-white border border-stone-200 rounded-2xl overflow-hidden max-w-4xl w-full h-[80vh] shadow-2xl relative flex flex-col">
+    <div id="modal-container" class="bg-white border border-stone-200 rounded-2xl overflow-hidden max-w-4xl w-full h-[90vh] shadow-2xl relative flex flex-col">
       
-      <!-- 頂部標題與大關閉按鈕 -->
+      <!-- 頂部標題 -->
       <div class="p-3.5 sm:p-4 border-b border-stone-100 flex justify-between items-center bg-stone-50/90 flex-shrink-0">
         <div id="modal-title" class="font-black text-stone-800 text-base sm:text-xl truncate">影片播放</div>
         <button onclick="closeVideoModal()" class="text-stone-400 hover:text-stone-700 p-1.5 rounded-xl hover:bg-stone-100 transition">
@@ -141,7 +141,7 @@
         </button>
       </div>
 
-      <!-- 💡 直式高聳 9:16 播放區 (拉長比例 + 左右黑邊) -->
+      <!-- 直式高聳 9:16 播放區 -->
       <div class="relative w-full bg-black flex-1 flex items-center justify-center overflow-hidden min-h-0">
         <iframe id="modal-iframe" src="" class="h-full aspect-[9/16] border-0 shadow-lg" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </div>
@@ -149,12 +149,12 @@
       <!-- 屬性標籤列 -->
       <div id="modal-footer" class="p-3 sm:p-4 bg-stone-50 border-t border-stone-100 text-xs sm:text-sm text-stone-700 flex flex-wrap gap-2.5 items-center justify-between flex-shrink-0"></div>
 
-      <!-- 同路線比較影片區 -->
-      <div class="p-3 sm:p-4 bg-white border-t border-stone-100 space-y-2.5 overflow-y-auto custom-scrollbar max-h-48 sm:max-h-56 flex-shrink-0">
-        <h4 class="text-xs sm:text-sm font-extrabold text-stone-800 flex items-center gap-2">
-          <i class="fa-solid fa-users-viewfinder text-stone-500 text-base"></i> 同場館同路線影片：
+      <!-- 💡 精緻縮小版的「同場館同路線影片」區 (欄數增加到 8~10 欄) -->
+      <div class="p-3 bg-white border-t border-stone-100 space-y-2 overflow-y-auto custom-scrollbar max-h-36 flex-shrink-0">
+        <h4 class="text-xs font-extrabold text-stone-800 flex items-center gap-1.5">
+          <i class="fa-solid fa-users-viewfinder text-stone-500 text-sm"></i> 同場館同路線影片：
         </h4>
-        <div id="same-route-grid" class="grid grid-cols-3 sm:grid-cols-6 gap-3"></div>
+        <div id="same-route-grid" class="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-10 gap-2"></div>
       </div>
     </div>
   </div>
@@ -649,6 +649,7 @@
       document.getElementById('video-modal').classList.remove('hidden');
     }
 
+    // 💡 渲染迷你精致版的同路線影片卡片
     function renderSameRouteVideos(currentVideo) {
       const grid = document.getElementById('same-route-grid');
       grid.innerHTML = '';
@@ -661,23 +662,23 @@
       );
 
       if (sameRoute.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-stone-400 text-xs sm:text-sm italic py-1">無其他攀爬者紀錄。</div>`;
+        grid.innerHTML = `<div class="col-span-full text-stone-400 text-xs italic py-1">無其他攀爬者紀錄。</div>`;
         return;
       }
 
       sameRoute.forEach(item => {
         const itemCard = document.createElement('div');
-        itemCard.className = 'bg-stone-50 border border-stone-200 rounded-lg overflow-hidden hover:border-stone-400 transition cursor-pointer flex flex-col group p-1.5 space-y-1';
+        itemCard.className = 'bg-stone-50 border border-stone-200 rounded-md overflow-hidden hover:border-stone-400 transition cursor-pointer flex flex-col group p-1 space-y-0.5';
         itemCard.onclick = () => openVideoModal(item.id);
 
         itemCard.innerHTML = `
           <div class="relative w-full aspect-[9/16] bg-stone-900 rounded overflow-hidden">
             <img src="${item.thumbnail}" class="w-full h-full object-cover group-hover:scale-105 transition">
             <div class="absolute inset-0 bg-stone-950/20 group-hover:bg-stone-950/10 flex items-center justify-center">
-              <i class="fa-brands fa-youtube text-red-600 text-lg group-hover:scale-110 transition"></i>
+              <i class="fa-brands fa-youtube text-red-600 text-xs group-hover:scale-110 transition"></i>
             </div>
           </div>
-          <div class="text-xs font-bold text-stone-700 truncate text-center">
+          <div class="text-[10px] font-bold text-stone-700 truncate text-center leading-tight">
             ${item.person}
           </div>
         `;
