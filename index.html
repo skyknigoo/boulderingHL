@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,216 +8,153 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap');
-
     body {
       font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background-color: #faf8f5;
       color: #2d3748;
     }
-
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
-
     .custom-scrollbar::-webkit-scrollbar-track {
       background: #f1f0ea;
       border-radius: 4px;
     }
-
     .custom-scrollbar::-webkit-scrollbar-thumb {
       background: #cbd5e1;
       border-radius: 4px;
     }
-
     .custom-scrollbar::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
   </style>
 </head>
-
 <body class="min-h-screen">
 
   <!-- Header -->
   <header class="bg-white/80 backdrop-blur-md border-b border-stone-200/80 sticky top-0 z-30 shadow-sm">
-    <div
-      class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col sm:flex-row justify-between items-center gap-4">
-      <div class="flex items-center space-x-3.5">
-        <div class="bg-red-600 p-3 rounded-2xl text-white shadow-sm">
-          <i class="fa-brands fa-youtube text-xl font-normal"></i>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-3.5 cursor-pointer" onclick="showGymOverview()">
+        <div class="bg-red-600 p-2.5 rounded-2xl text-white shadow-sm">
+          <i class="fa-brands fa-youtube text-lg"></i>
         </div>
         <div>
-          <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-stone-800 flex items-center gap-3">
+          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-stone-800">
             抱石影片紀錄
           </h1>
         </div>
       </div>
 
-      <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-        <button style="display: none;" id="api-config-btn" onclick="openConfigModal()"
-          class="flex items-center gap-2 bg-stone-100 hover:bg-stone-200/80 text-stone-700 text-sm font-semibold px-4 py-2.5 rounded-xl transition border border-stone-200">
-          <i class="fa-solid fa-key text-amber-600"></i>
-          <span>API 金鑰與頻道設定</span>
+      <div class="flex items-center gap-3">
+        <button id="back-to-home-btn" onclick="showGymOverview()" class="hidden flex items-center gap-2 bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-bold px-4 py-2 rounded-xl transition border border-stone-200">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>返回岩館總覽</span>
         </button>
-        <button id="refresh-btn" onclick="fetchYouTubeData()"
-          class="flex items-center gap-2 bg-stone-800 hover:bg-stone-700 text-white text-sm px-5 py-2.5 rounded-xl transition font-bold shadow-sm">
+        <button id="refresh-btn" onclick="initApp()" class="flex items-center gap-2 bg-stone-800 hover:bg-stone-700 text-white text-sm px-4 py-2 rounded-xl transition font-bold shadow-sm">
           <i class="fa-solid fa-arrows-rotate" id="refresh-icon"></i>
-          <span>同步 YT 頻道資料</span>
+          <span class="hidden sm:inline">重新同步</span>
         </button>
       </div>
     </div>
   </header>
 
   <!-- Main Container -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-    <div id="demo-mode-banner"
-      class="hidden bg-amber-50/80 border border-amber-200 rounded-2xl p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-amber-900 text-sm shadow-sm">
-      <div class="flex items-center gap-3.5">
-        <i class="fa-solid fa-circle-info text-amber-600 text-2xl flex-shrink-0"></i>
+    <!-- 第一層：岩館分類主頁面 (Home Section) -->
+    <section id="gym-overview-section" class="space-y-10">
+      <div class="border-b border-stone-200 pb-4 flex justify-between items-end">
         <div>
-          <strong class="font-bold text-amber-950 text-base">目前為「離線預覽範例模式」</strong>
-          <span class="block text-amber-800/90 text-sm mt-0.5">點擊右上角「API 金鑰與頻道設定」輸入您的 Google API Key 與頻道 ID 即可同步！</span>
+          <h2 class="text-xl sm:text-2xl font-black text-stone-800">攀岩館列表</h2>
+          <p class="text-stone-500 text-sm mt-1">按最新紀錄時間由近至遠排序</p>
         </div>
-      </div>
-      <button onclick="openConfigModal()"
-        class="whitespace-nowrap bg-amber-600 text-white font-bold px-4 py-2 rounded-xl hover:bg-amber-700 transition text-sm shadow-sm">
-        設定頻道資訊
-      </button>
-    </div>
-
-    <!-- Filter Control Panel -->
-    <section class="bg-white rounded-2xl p-6 border border-stone-200/80 shadow-sm space-y-6">
-      <div
-        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-stone-100 pb-5">
-        <h2 class="text-base sm:text-lg font-bold text-stone-700 tracking-wide flex items-center gap-2">
-          <i class="fa-solid fa-sliders text-stone-500 text-lg"></i> 影片多維度動態篩選
-        </h2>
-
-        <div class="flex items-center gap-3 w-full md:w-auto">
-          <div class="relative flex-1 md:w-72">
-            <i
-              class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm"></i>
-            <input type="text" id="search-input" oninput="handleSearch()" placeholder="搜尋關鍵字 (如：桃石, 嘉...)"
-              class="w-full bg-stone-50 border border-stone-200 rounded-xl pl-10 pr-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-400 focus:bg-white transition">
-          </div>
-          <button onclick="resetFilters()"
-            class="text-sm font-medium text-stone-600 hover:text-stone-900 flex items-center gap-2 px-3.5 py-2 rounded-xl border border-stone-200 hover:border-stone-300 bg-stone-50 transition">
-            <i class="fa-solid fa-rotate-left text-xs"></i> 重置篩選
-          </button>
-        </div>
+        <div id="gym-count-badge" class="text-xs font-bold bg-stone-200 text-stone-700 px-3 py-1.5 rounded-xl">載入中...</div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4" id="filters-wrapper"></div>
-
-      <div id="active-tags-container"
-        class="flex flex-wrap items-center gap-2 pt-1 text-sm text-stone-600 min-h-[32px]">
-        <span class="font-medium text-stone-400">已選條件：</span>
-        <div id="active-tags" class="flex flex-wrap gap-2"></div>
-      </div>
+      <div id="gym-list-container" class="space-y-12"></div>
     </section>
 
-    <!-- Stats Bar -->
-    <div class="flex justify-between items-center text-sm font-medium text-stone-500 px-1">
-      <div>共顯示 <span id="displayed-count" class="font-bold text-stone-800 text-base">0</span> / <span id="total-count"
-          class="font-bold text-stone-800 text-base">0</span> 支影片</div>
-      <div id="channel-info" class="text-stone-400 truncate max-w-xs sm:max-w-md">頻道狀態: 未連線</div>
-    </div>
+    <!-- 第二層：單一岩館詳細資料頁面 (Detail Section) -->
+    <section id="gym-detail-section" class="hidden space-y-8">
+      <!-- 頂部頁面標題與導覽 -->
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl border border-stone-200/80 shadow-sm">
+        <div>
+          <div class="text-xs font-bold text-red-600 mb-1 flex items-center gap-1">
+            <i class="fa-solid fa-location-dot"></i> 當前攀岩館
+          </div>
+          <h2 id="current-gym-name" class="text-2xl sm:text-3xl font-black text-stone-800">岩館名稱</h2>
+        </div>
+        <div class="text-sm font-medium text-stone-500">
+          共顯示 <span id="displayed-count" class="font-bold text-stone-800 text-base">0</span> / <span id="total-count" class="font-bold text-stone-800 text-base">0</span> 支影片
+        </div>
+      </div>
 
-    <!-- Video Grid -->
-    <section id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></section>
+      <!-- 篩選控制面板 -->
+      <section class="bg-white rounded-2xl p-6 border border-stone-200/80 shadow-sm space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-stone-100 pb-5">
+          <h3 class="text-base font-bold text-stone-700 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-stone-500"></i> 動態多維度篩選
+          </h3>
+          
+          <div class="flex items-center gap-3 w-full md:w-auto">
+            <div class="relative flex-1 md:w-64">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400 text-sm"></i>
+              <input type="text" id="search-input" oninput="handleSearch()" placeholder="搜尋關鍵字..." class="w-full bg-stone-50 border border-stone-200 rounded-xl pl-10 pr-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-400 focus:bg-white transition">
+            </div>
+            <button onclick="resetFilters()" class="text-sm font-medium text-stone-600 hover:text-stone-900 flex items-center gap-2 px-3.5 py-2 rounded-xl border border-stone-200 bg-stone-50 transition">
+              <i class="fa-solid fa-rotate-left text-xs"></i> 重置
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4" id="filters-wrapper"></div>
+
+        <div id="active-tags-container" class="flex flex-wrap items-center gap-2 pt-1 text-sm text-stone-600 min-h-[32px]">
+          <span class="font-medium text-stone-400">已選條件：</span>
+          <div id="active-tags" class="flex flex-wrap gap-2"></div>
+        </div>
+      </section>
+
+      <!-- 影片卡片網格 -->
+      <section id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></section>
+    </section>
 
   </main>
 
   <!-- Video Modal -->
-  <div id="video-modal"
-    class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-4 transition-all duration-300">
-    <div id="modal-container"
-      class="bg-white border border-stone-200 rounded-2xl overflow-hidden max-w-4xl w-full shadow-2xl relative flex flex-col max-h-[92vh] transition-all duration-300">
+  <div id="video-modal" class="fixed inset-0 z-50 bg-stone-900/60 backdrop-blur-sm hidden flex items-center justify-center p-2 sm:p-4 transition-all duration-300">
+    <div id="modal-container" class="bg-white border border-stone-200 rounded-2xl overflow-hidden max-w-4xl w-full shadow-2xl relative flex flex-col max-h-[92vh]">
       <div class="p-4 border-b border-stone-100 flex justify-between items-center bg-stone-50/80">
         <div id="modal-title" class="font-bold text-stone-800 text-base sm:text-lg truncate">影片播放</div>
-        <div class="flex items-center gap-2">
-          <div class="flex bg-stone-200/60 p-1 rounded-xl text-xs font-semibold">
-            <button onclick="resizeModal('small')"
-              class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white">小</button>
-            <button onclick="resizeModal('medium')"
-              class="px-2.5 py-1 rounded-lg text-stone-900 font-bold bg-white shadow-sm">中</button>
-            <button onclick="resizeModal('large')"
-              class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white">大</button>
-            <button onclick="resizeModal('full')" class="px-2.5 py-1 rounded-lg text-stone-600 hover:bg-white"><i
-                class="fa-solid fa-expand"></i></button>
-          </div>
-          <button onclick="closeVideoModal()"
-            class="text-stone-400 hover:text-stone-700 p-2 rounded-xl hover:bg-stone-100">
-            <i class="fa-solid fa-xmark text-2xl"></i>
-          </button>
-        </div>
+        <button onclick="closeVideoModal()" class="text-stone-400 hover:text-stone-700 p-2 rounded-xl hover:bg-stone-100">
+          <i class="fa-solid fa-xmark text-2xl"></i>
+        </button>
       </div>
       <div class="relative w-full aspect-video bg-black flex-shrink-0">
-        <iframe id="modal-iframe" src="" class="w-full h-full border-0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowfullscreen></iframe>
+        <iframe id="modal-iframe" src="" class="w-full h-full border-0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </div>
-      <div id="modal-footer"
-        class="p-4 bg-stone-50 border-t border-stone-100 text-sm text-stone-700 flex flex-wrap gap-2 items-center justify-between">
-      </div>
+      <div id="modal-footer" class="p-4 bg-stone-50 border-t border-stone-100 text-sm text-stone-700 flex flex-wrap gap-2 items-center justify-between"></div>
       <div class="p-4 bg-white border-t border-stone-100 space-y-3 overflow-y-auto custom-scrollbar flex-1">
         <h4 class="text-sm font-bold text-stone-700 flex items-center gap-2">
-          <i class="fa-solid fa-users-viewfinder text-stone-500"></i> 相同路線的其他攀爬者影片：
+          <i class="fa-solid fa-users-viewfinder text-stone-500"></i> 同場館同路線影片：
         </h4>
         <div id="same-route-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
       </div>
     </div>
   </div>
 
-  <!-- Config Modal -->
-  <div id="config-modal"
-    class="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
-    <div class="bg-white border border-stone-200 rounded-2xl max-w-lg w-full p-6 space-y-5 shadow-2xl relative">
-      <div class="flex justify-between items-center border-b border-stone-100 pb-3">
-        <h3 class="text-lg font-bold text-stone-800 flex items-center gap-2">
-          <i class="fa-brands fa-youtube text-red-600"></i> YouTube API & 頻道設定
-        </h3>
-        <button onclick="closeConfigModal()" class="text-stone-400 hover:text-stone-700">
-          <i class="fa-solid fa-xmark text-xl"></i>
-        </button>
-      </div>
-      <div class="space-y-4 text-sm text-stone-700">
-        <div>
-          <label class="block mb-1.5 font-semibold text-stone-800">Google API Key</label>
-          <input type="password" id="api-key-input" placeholder="AIzaSy..."
-            class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-stone-800 text-sm focus:outline-none focus:border-stone-400 font-mono">
-        </div>
-        <div>
-          <label class="block mb-1.5 font-semibold text-stone-800">YouTube 頻道 ID 或 @Handle</label>
-          <input type="text" id="channel-id-input" placeholder="例如：UCUFu4m0t1GNp4ZKYAnsODJg 或 @skykingoo"
-            class="w-full bg-stone-50 border border-stone-200 rounded-xl px-3.5 py-2.5 text-stone-800 text-sm focus:outline-none focus:border-stone-400 font-mono">
-          <p class="text-xs text-stone-400 mt-1">程式會自動掃描該頻道下「所有播放清單」當作場館紀錄</p>
-        </div>
-      </div>
-      <div class="flex justify-end gap-3 pt-2">
-        <button onclick="closeConfigModal()"
-          class="px-5 py-2.5 bg-stone-100 hover:bg-stone-200 rounded-xl text-sm font-semibold transition">取消</button>
-        <button onclick="saveConfig()"
-          class="px-5 py-2.5 bg-stone-800 hover:bg-stone-700 text-white rounded-xl text-sm font-bold transition">儲存並同步</button>
-      </div>
-    </div>
-  </div>
-
   <script>
-    const DEMO_VIDEOS = [
-      { id: "dQw4w9WgXcQ", name: "C面 桃石 V1 嘉", folderName: "260719 攀呐", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" },
-      { id: "dQw4w9WgXcQ", name: "1F 橘石2 挑戰 嘉", folderName: "20260726 B-Plus(太原店)", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" }
-    ];
+    const apiKey = 'AIzaSyAJ_5wsSXdf52qSkMyLYCjVuw57HJ6fipw';
+    const channelId = 'UCUFu4m0t1GNp4ZKYAnsODjg';
 
-    // ⭐ 內建預設 API Key 與 頻道 ID (若 localStorage 無自訂設定，則使用預設值)
-    let apiKey = localStorage.getItem('yt_boulder_api_key') || 'AIzaSyAJ_5wsSXdf52qSkMyLYCjVuw57HJ6fipw';
-    let channelId = localStorage.getItem('yt_boulder_channel_id') || 'UCUFu4m0t1GNp4ZKYAnsODjg';
-
-    let rawVideoList = [];
-    let parsedVideoList = [];
-
-    let activeFilters = { gymDate: 'ALL', person: 'ALL', difficulty: 'ALL', color: 'ALL', wall: 'ALL' };
+    let allPlaylists = [];        // 所有播放清單核心資料
+    let gymGroupedMap = {};       // 按岩館名稱歸類的資料結構
+    let currentGymName = '';      // 當前選取的岩館名稱
+    let currentGymVideos = [];    // 當前岩館的所有影片清單
+    let parsedVideoList = [];     // 解析後的影片物件陣列
+    
+    let activeFilters = { date: 'ALL', person: 'ALL', difficulty: 'ALL', color: 'ALL', wall: 'ALL' };
     let searchQuery = '';
 
     const colorStyleMap = {
@@ -235,20 +171,195 @@
     };
 
     window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('api-key-input').value = apiKey;
-      document.getElementById('channel-id-input').value = channelId;
-
-      if (apiKey && channelId) {
-        document.getElementById('demo-mode-banner').classList.add('hidden');
-        fetchYouTubeData();
-      } else {
-        loadDemoData();
-      }
+      initApp();
     });
 
-    function loadDemoData() {
-      rawVideoList = DEMO_VIDEOS;
-      processVideoData();
+    // 1. 初始化，發送 1 次請求取得頻道下所有播放清單
+    async function initApp() {
+      const refreshIcon = document.getElementById('refresh-icon');
+      refreshIcon.classList.add('fa-spin');
+
+      try {
+        const playlistsUrl = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${channelId}&maxResults=50&key=${apiKey}`;
+        const plResp = await fetch(playlistsUrl);
+        const plData = await plResp.json();
+
+        if (plData.error) throw new Error(plData.error.message);
+
+        allPlaylists = plData.items || [];
+        processGymGroups();
+        showGymOverview();
+
+      } catch (err) {
+        console.error('Fetch Playlists Error:', err);
+        alert(`初始化失敗: ${err.message}`);
+      } finally {
+        refreshIcon.classList.remove('fa-spin');
+      }
+    }
+
+    // 2. 將播放清單名稱解析為 [日期, 岩館名稱] 並按岩館分組，依最新日期排序
+    function processGymGroups() {
+      gymGroupedMap = {};
+
+      allPlaylists.forEach(pl => {
+        const title = pl.snippet.title.trim(); // 例如 "20260726 B-Plus(太原店)" 或 "260719 攀呐"
+        const parts = title.split(/\s+/);
+        
+        let dateStr = parts[0] || '未分類日期';
+        let gymName = parts.slice(1).join(' ') || '未分類岩館';
+
+        if (!gymGroupedMap[gymName]) {
+          gymGroupedMap[gymName] = {
+            gymName: gymName,
+            latestDate: dateStr,
+            playlists: []
+          };
+        }
+
+        if (dateStr > gymGroupedMap[gymName].latestDate) {
+          gymGroupedMap[gymName].latestDate = dateStr;
+        }
+
+        gymGroupedMap[gymName].playlists.push({
+          id: pl.id,
+          title: title,
+          date: dateStr,
+          thumbnail: pl.snippet.thumbnails?.high?.url || pl.snippet.thumbnails?.medium?.url
+        });
+      });
+
+      // 針對每個岩館內的播放清單依日期降冪排序 (新到舊)
+      Object.keys(gymGroupedMap).forEach(gym => {
+        gymGroupedMap[gym].playlists.sort((a, b) => b.date.localeCompare(a.date));
+      });
+    }
+
+    // 3. 渲染第一層：岩館列表主頁面
+    async function showGymOverview() {
+      document.getElementById('gym-overview-section').classList.remove('hidden');
+      document.getElementById('gym-detail-section').classList.add('hidden');
+      document.getElementById('back-to-home-btn').classList.add('hidden');
+
+      const container = document.getElementById('gym-list-container');
+      container.innerHTML = '';
+
+      // 依最新日期將岩館排序
+      const sortedGyms = Object.values(gymGroupedMap).sort((a, b) => b.latestDate.localeCompare(a.latestDate));
+      document.getElementById('gym-count-badge').innerText = `共 ${sortedGyms.length} 間攀岩館`;
+
+      for (const gym of sortedGyms) {
+        const gymCard = document.createElement('div');
+        gymCard.className = 'bg-white rounded-2xl p-6 border border-stone-200/80 shadow-sm space-y-4';
+
+        gymCard.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-stone-100 pb-3">
+            <div>
+              <h3 class="text-xl font-extrabold text-stone-800">${gym.gymName}</h3>
+              <p class="text-xs font-semibold text-stone-400 mt-0.5">最新攀爬紀錄：${gym.latestDate} · 共 ${gym.playlists.length} 次紀錄</p>
+            </div>
+            <button onclick="enterGymDetail('${gym.gymName}')" class="self-start sm:self-auto bg-stone-800 hover:bg-stone-700 text-white text-xs font-bold px-4 py-2 rounded-xl transition flex items-center gap-1.5 shadow-sm">
+              <span>進入場館查看完整紀錄</span>
+              <i class="fa-solid fa-chevron-right text-[10px]"></i>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="preview-grid-${gym.gymName.replace(/\s+/g, '-')}">
+            <div class="col-span-full py-6 text-center text-xs text-stone-400 font-bold">預覽載入中...</div>
+          </div>
+        `;
+        container.appendChild(gymCard);
+
+        // 非同步讀取該岩館最新一個播放清單的前 4 支影片預覽
+        loadGymPreviewVideos(gym.gymName, gym.playlists[0].id);
+      }
+    }
+
+    // 載入岩館首頁預覽影片
+    async function loadGymPreviewVideos(gymName, latestPlaylistId) {
+      const targetGrid = document.getElementById(`preview-grid-${gymName.replace(/\s+/g, '-')}`);
+      if (!targetGrid) return;
+
+      try {
+        const itemsUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${latestPlaylistId}&maxResults=4&key=${apiKey}`;
+        const resp = await fetch(itemsUrl);
+        const data = await resp.json();
+
+        targetGrid.innerHTML = '';
+        if (data.items && data.items.length > 0) {
+          data.items.forEach(item => {
+            const title = item.snippet.title;
+            const thumb = (item.snippet.thumbnails.medium || item.snippet.thumbnails.default)?.url;
+            const videoId = item.snippet.resourceId.videoId;
+
+            const card = document.createElement('div');
+            card.className = 'bg-stone-50 rounded-xl overflow-hidden border border-stone-200/80 group cursor-pointer hover:border-stone-400 transition';
+            card.onclick = () => openVideoModalDirectly(videoId, title, gymName);
+
+            card.innerHTML = `
+              <div class="relative aspect-video bg-stone-900 overflow-hidden">
+                <img src="${thumb}" class="w-full h-full object-cover group-hover:scale-105 transition">
+                <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition flex items-center justify-center">
+                  <i class="fa-solid fa-play text-white/90 text-xl group-hover:scale-110 transition"></i>
+                </div>
+              </div>
+              <div class="p-2.5">
+                <p class="text-xs font-bold text-stone-800 line-clamp-1">${title}</p>
+              </div>
+            `;
+            targetGrid.appendChild(card);
+          });
+        } else {
+          targetGrid.innerHTML = `<div class="col-span-full text-stone-400 text-xs italic py-2">無可預覽影片</div>`;
+        }
+      } catch (err) {
+        targetGrid.innerHTML = `<div class="col-span-full text-stone-400 text-xs italic py-2">預覽載入失敗</div>`;
+      }
+    }
+
+    // 4. 點擊進入第二層：單一岩館頁面，載入該岩館所有播放清單的影片
+    async function enterGymDetail(gymName) {
+      currentGymName = gymName;
+      document.getElementById('gym-overview-section').classList.add('hidden');
+      document.getElementById('gym-detail-section').classList.remove('hidden');
+      document.getElementById('back-to-home-btn').classList.remove('hidden');
+      document.getElementById('current-gym-name').innerText = gymName;
+
+      const refreshIcon = document.getElementById('refresh-icon');
+      refreshIcon.classList.add('fa-spin');
+
+      try {
+        currentGymVideos = [];
+        const gymInfo = gymGroupedMap[gymName];
+
+        // 依序抓取該岩館所有日期播放清單的影片
+        for (const pl of gymInfo.playlists) {
+          const itemsUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${pl.id}&maxResults=50&key=${apiKey}`;
+          const itemResp = await fetch(itemsUrl);
+          const itemData = await itemResp.json();
+
+          if (itemData.items) {
+            itemData.items.forEach(item => {
+              currentGymVideos.push({
+                id: item.snippet.resourceId.videoId,
+                name: item.snippet.title,
+                date: pl.date,
+                gymName: gymName,
+                thumbnail: (item.snippet.thumbnails.high || item.snippet.thumbnails.medium)?.url
+              });
+            });
+          }
+        }
+
+        parsedVideoList = currentGymVideos.map(item => parseFileNameAndPath(item));
+        resetFilters();
+
+      } catch (err) {
+        console.error('Fetch Gym Detail Videos Error:', err);
+        alert(`載入場館影片失敗: ${err.message}`);
+      } finally {
+        refreshIcon.classList.remove('fa-spin');
+      }
     }
 
     function parseFileNameAndPath(item) {
@@ -258,16 +369,15 @@
       const wall = parts[0] || '未分類牆面';
       const color = parts[1] || '未分類顏色';
       const difficulty = parts[2] || '未分類難度';
-
+      
       let person = parts[3] || '未指定人名';
       if (person.toLowerCase() === 'irene') person = 'Irene';
-
-      const gymDate = item.folderName || '未分類播放清單';
 
       return {
         id: item.id,
         fullName: item.name,
-        gymDate: gymDate,
+        date: item.date,
+        gymName: item.gymName,
         wall: wall,
         color: color,
         difficulty: difficulty,
@@ -277,18 +387,13 @@
       };
     }
 
-    function processVideoData() {
-      parsedVideoList = rawVideoList.map(item => parseFileNameAndPath(item));
-      buildDynamicFiltersUI();
-      renderVideoGrid();
-    }
-
+    // 動態建立岩館內的多維度選單 (全部選單項目永遠固定在第一位)
     function buildDynamicFiltersUI() {
       const filterWrapper = document.getElementById('filters-wrapper');
       filterWrapper.innerHTML = '';
 
       const filterConfigs = [
-        { id: 'gymDate', label: '攀岩館/日期', icon: 'fa-location-dot', key: 'gymDate' },
+        { id: 'date', label: '紀錄日期', icon: 'fa-calendar-days', key: 'date' },
         { id: 'person', label: '攀爬者', icon: 'fa-user', key: 'person' },
         { id: 'difficulty', label: '難度', icon: 'fa-gauge-high', key: 'difficulty' },
         { id: 'color', label: '石頭顏色', icon: 'fa-palette', key: 'color' },
@@ -298,14 +403,13 @@
       filterConfigs.forEach(cfg => {
         let availableVideos = parsedVideoList;
 
-        if (cfg.key === 'wall' && activeFilters.gymDate !== 'ALL') {
-          availableVideos = parsedVideoList.filter(v => v.gymDate === activeFilters.gymDate);
+        if (cfg.key === 'wall' && activeFilters.date !== 'ALL') {
+          availableVideos = parsedVideoList.filter(v => v.date === activeFilters.date);
         }
 
-        // 取得不重複的值並排序
         const itemValues = [...new Set(availableVideos.map(v => v[cfg.key]))].sort();
-
-        // ⭐ 關鍵修正：將 'ALL' 永遠固定放在選項陣列的最前端 (首位)
+        
+        // ⭐ 「全部」選項固定在陣列第一位 (首位)
         const uniqueValues = ['ALL', ...itemValues];
 
         if (!uniqueValues.includes(activeFilters[cfg.key])) {
@@ -320,7 +424,6 @@
         label.innerHTML = `<i class="fa-solid ${cfg.icon} text-stone-500"></i> ${cfg.label}`;
 
         const select = document.createElement('select');
-        select.id = `select-filter-${cfg.key}`;
         select.className = 'w-full bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-sm font-semibold text-stone-800 focus:outline-none focus:border-stone-400 focus:bg-white transition cursor-pointer shadow-sm';
 
         uniqueValues.forEach(val => {
@@ -333,10 +436,9 @@
         select.value = activeFilters[cfg.key];
 
         select.addEventListener('change', (e) => {
-          const newValue = e.target.value;
-          activeFilters[cfg.key] = newValue;
+          activeFilters[cfg.key] = e.target.value;
 
-          if (cfg.key === 'gymDate') {
+          if (cfg.key === 'date') {
             activeFilters.wall = 'ALL';
             buildDynamicFiltersUI();
           }
@@ -358,7 +460,7 @@
       tagsContainer.innerHTML = '';
 
       let hasActive = false;
-      const labelNames = { gymDate: '場館', person: '攀爬者', difficulty: '難度', color: '顏色', wall: '牆面' };
+      const labelNames = { date: '日期', person: '攀爬者', difficulty: '難度', color: '顏色', wall: '牆面' };
 
       Object.keys(activeFilters).forEach(k => {
         if (activeFilters[k] !== 'ALL') {
@@ -382,7 +484,7 @@
     }
 
     function resetFilters() {
-      activeFilters = { gymDate: 'ALL', person: 'ALL', difficulty: 'ALL', color: 'ALL', wall: 'ALL' };
+      activeFilters = { date: 'ALL', person: 'ALL', difficulty: 'ALL', color: 'ALL', wall: 'ALL' };
       document.getElementById('search-input').value = '';
       searchQuery = '';
       buildDynamicFiltersUI();
@@ -399,14 +501,14 @@
       grid.innerHTML = '';
 
       const filtered = parsedVideoList.filter(video => {
-        const matchGym = activeFilters.gymDate === 'ALL' || video.gymDate === activeFilters.gymDate;
+        const matchDate = activeFilters.date === 'ALL' || video.date === activeFilters.date;
         const matchPerson = activeFilters.person === 'ALL' || video.person === activeFilters.person;
         const matchDiff = activeFilters.difficulty === 'ALL' || video.difficulty === activeFilters.difficulty;
         const matchColor = activeFilters.color === 'ALL' || video.color === activeFilters.color;
         const matchWall = activeFilters.wall === 'ALL' || video.wall === activeFilters.wall;
-        const matchSearch = !searchQuery || video.fullName.toLowerCase().includes(searchQuery) || video.gymDate.toLowerCase().includes(searchQuery);
+        const matchSearch = !searchQuery || video.fullName.toLowerCase().includes(searchQuery) || video.date.toLowerCase().includes(searchQuery);
 
-        return matchGym && matchPerson && matchDiff && matchColor && matchWall && matchSearch;
+        return matchDate && matchPerson && matchDiff && matchColor && matchWall && matchSearch;
       });
 
       document.getElementById('displayed-count').innerText = filtered.length;
@@ -446,7 +548,7 @@
           <div class="p-5 flex-1 flex flex-col justify-between space-y-4">
             <div>
               <div class="text-xs text-stone-500 font-bold flex items-center gap-1.5 mb-1.5">
-                <i class="fa-solid fa-location-dot text-stone-400"></i> ${video.gymDate}
+                <i class="fa-solid fa-calendar-days text-stone-400"></i> ${video.date}
               </div>
               <h3 class="font-extrabold text-stone-800 text-base line-clamp-1 group-hover:text-stone-900 transition" title="${video.fullName}">
                 ${video.fullName}
@@ -472,13 +574,13 @@
 
       document.getElementById('modal-title').innerText = video.fullName;
       document.getElementById('modal-iframe').src = video.embedUrl;
-
+      
       const footer = document.getElementById('modal-footer');
       const badgeStyle = colorStyleMap[video.color] || 'bg-stone-100 text-stone-700 border-stone-200';
 
       footer.innerHTML = `
         <div class="flex flex-wrap gap-2 items-center text-xs font-bold">
-          <span class="bg-stone-200/80 text-stone-800 px-3 py-1 rounded-lg"><i class="fa-solid fa-location-dot text-stone-500"></i> ${video.gymDate}</span>
+          <span class="bg-stone-200/80 text-stone-800 px-3 py-1 rounded-lg"><i class="fa-solid fa-location-dot text-stone-500"></i> ${video.gymName} (${video.date})</span>
           <span class="bg-stone-100 text-stone-700 px-3 py-1 rounded-lg border border-stone-200">${video.wall}</span>
           <span class="px-3 py-1 rounded-lg border ${badgeStyle}">${video.color}</span>
           <span class="bg-stone-100 text-stone-700 px-3 py-1 rounded-lg border border-stone-200">${video.difficulty}</span>
@@ -493,12 +595,19 @@
       document.getElementById('video-modal').classList.remove('hidden');
     }
 
+    function openVideoModalDirectly(videoId, title, gymName) {
+      document.getElementById('modal-title').innerText = title;
+      document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
+      document.getElementById('modal-footer').innerHTML = `<span class="text-xs font-bold text-stone-600">${gymName}</span>`;
+      document.getElementById('same-route-grid').innerHTML = `<div class="col-span-full text-stone-400 text-xs italic py-2">請點擊進入岩館頁面查看同路線比較影片。</div>`;
+      document.getElementById('video-modal').classList.remove('hidden');
+    }
+
     function renderSameRouteVideos(currentVideo) {
       const grid = document.getElementById('same-route-grid');
       grid.innerHTML = '';
 
-      const sameRoute = parsedVideoList.filter(v =>
-        v.gymDate === currentVideo.gymDate &&
+      const sameRoute = parsedVideoList.filter(v => 
         v.wall === currentVideo.wall &&
         v.color === currentVideo.color &&
         v.difficulty === currentVideo.difficulty &&
@@ -506,7 +615,7 @@
       );
 
       if (sameRoute.length === 0) {
-        grid.innerHTML = `<div class="col-span-full text-stone-400 text-xs italic py-2">目前沒有這條路線其他人的影片。</div>`;
+        grid.innerHTML = `<div class="col-span-full text-stone-400 text-xs italic py-2">同場館目前沒有這條路線其他人的影片。</div>`;
         return;
       }
 
@@ -523,139 +632,18 @@
             </div>
           </div>
           <div class="flex justify-between items-center text-xs font-bold text-stone-700">
-            <span class="truncate">${item.person}</span>
+            <span class="truncate">${item.person} (${item.date})</span>
             <span class="text-[10px] text-stone-600 bg-stone-200/80 px-1.5 py-0.5 rounded">查看</span>
           </div>
         `;
-        grid.appendChild(itemCard);
+        grid.appendChild(card);
       });
-    }
-
-    function resizeModal(size) {
-      const container = document.getElementById('modal-container');
-      container.classList.remove('max-w-2xl', 'max-w-4xl', 'max-w-6xl', 'max-w-full');
-
-      if (size === 'small') container.classList.add('max-w-2xl');
-      else if (size === 'medium') container.classList.add('max-w-4xl');
-      else if (size === 'large') container.classList.add('max-w-6xl');
-      else if (size === 'full') container.classList.add('max-w-full', 'mx-4');
     }
 
     function closeVideoModal() {
       document.getElementById('video-modal').classList.add('hidden');
       document.getElementById('modal-iframe').src = '';
     }
-
-    function openConfigModal() {
-      document.getElementById('config-modal').classList.remove('hidden');
-    }
-
-    function closeConfigModal() {
-      document.getElementById('config-modal').classList.add('hidden');
-    }
-
-    function saveConfig() {
-      apiKey = document.getElementById('api-key-input').value.trim();
-      channelId = document.getElementById('channel-id-input').value.trim();
-
-      localStorage.setItem('yt_boulder_api_key', apiKey);
-      localStorage.setItem('yt_boulder_channel_id', channelId);
-
-      closeConfigModal();
-
-      if (apiKey && channelId) {
-        document.getElementById('demo-mode-banner').classList.add('hidden');
-        fetchYouTubeData();
-      } else {
-        document.getElementById('demo-mode-banner').classList.remove('hidden');
-        loadDemoData();
-      }
-    }
-
-    // --- YouTube API 讀取邏輯 ---
-    async function fetchYouTubeData() {
-      if (!apiKey || !channelId) {
-        openConfigModal();
-        return;
-      }
-
-      const refreshIcon = document.getElementById('refresh-icon');
-      refreshIcon.classList.add('fa-spin');
-
-      try {
-        rawVideoList = [];
-        document.getElementById('channel-info').innerText = `正在讀取頻道播放清單...`;
-
-        let inputVal = channelId.trim();
-        if (inputVal.includes('/channel/')) inputVal = inputVal.split('/channel/')[1].split('/')[0];
-        if (inputVal.includes('/@')) inputVal = '@' + inputVal.split('/@')[1].split('/')[0];
-
-        let targetChannelId = inputVal;
-
-        if (inputVal.startsWith('@')) {
-          const handle = inputVal.replace('@', '');
-          const cResp = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=id&forHandle=${handle}&key=${apiKey}`);
-          const cData = await cResp.json();
-          if (cData.items && cData.items.length > 0) {
-            targetChannelId = cData.items[0].id;
-          } else {
-            throw new Error(`找不到 @${handle} 對應的頻道`);
-          }
-        }
-
-        const playlistsUrl = `https://www.googleapis.com/youtube/v3/playlists?part=snippet&channelId=${targetChannelId}&maxResults=50&key=${apiKey}`;
-        const plResp = await fetch(playlistsUrl);
-        const plData = await plResp.json();
-
-        if (plData.error) {
-          console.error("YouTube Playlists Error:", plData.error);
-          throw new Error(`[API 錯誤 ${plData.error.code}] ${plData.error.message}`);
-        }
-
-        const playlists = plData.items || [];
-
-        if (playlists.length === 0) {
-          document.getElementById('channel-info').innerText = `頻道未找到播放清單`;
-          alert('在您的頻道中找不到「播放清單」！\n請確認播放清單權限已改為「公開」。');
-          return;
-        }
-
-        for (const pl of playlists) {
-          const playlistTitle = pl.snippet.title;
-          const playlistId = pl.id;
-
-          const itemsUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${playlistId}&maxResults=50&key=${apiKey}`;
-          const itemResp = await fetch(itemsUrl);
-          const itemData = await itemResp.json();
-
-          if (itemData.items) {
-            itemData.items.forEach(item => {
-              const videoId = item.snippet.resourceId.videoId;
-              const videoTitle = item.snippet.title;
-              const thumbnails = item.snippet.thumbnails;
-              const thumbUrl = (thumbnails.high || thumbnails.medium || thumbnails.default)?.url;
-
-              rawVideoList.push({
-                id: videoId,
-                name: videoTitle,
-                folderName: playlistTitle,
-                thumbnail: thumbUrl
-              });
-            });
-          }
-        }
-
-        document.getElementById('channel-info').innerText = `成功讀取 ${playlists.length} 個播放清單，共 ${rawVideoList.length} 支影片`;
-        processVideoData();
-
-      } catch (err) {
-        console.error('Fetch YouTube API Error:', err);
-        alert(`存取 YouTube Data API 失敗！\n\n原因：${err.message}`);
-      } finally {
-        refreshIcon.classList.remove('fa-spin');
-      }
-    }
   </script>
 </body>
-
 </html>
