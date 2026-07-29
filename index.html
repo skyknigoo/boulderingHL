@@ -150,12 +150,12 @@
       <div id="modal-footer" class="p-3 sm:p-4 bg-stone-50 border-t border-stone-100 text-xs sm:text-sm text-stone-700 flex flex-wrap gap-2.5 items-center justify-between flex-shrink-0"></div>
 
       <!-- 💡 精緻縮小版的「同場館同路線影片」區 (欄數增加到 8~10 欄) -->
-      <div class="p-3 bg-white border-t border-stone-100 space-y-2 overflow-y-auto custom-scrollbar max-h-36 flex-shrink-0">
-        <h4 class="text-xs font-extrabold text-stone-800 flex items-center gap-1.5">
-          <i class="fa-solid fa-users-viewfinder text-stone-500 text-sm"></i> 同場館同路線影片：
-        </h4>
-        <div id="same-route-grid" class="grid grid-cols-4 sm:grid-cols-8 md:grid-cols-10 gap-2"></div>
-      </div>
+<div class="p-3 bg-white border-t border-stone-100 space-y-2 overflow-y-auto custom-scrollbar max-h-52 flex-shrink-0">
+  <h4 class="text-xs font-extrabold text-stone-800 flex items-center gap-1.5">
+    <i class="fa-solid fa-users-viewfinder text-stone-500 text-sm"></i> 同場館同路線影片：
+  </h4>
+  <div id="same-route-grid" class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-2.5"></div>
+</div>
     </div>
   </div>
 
@@ -668,17 +668,18 @@
 
       sameRoute.forEach(item => {
         const itemCard = document.createElement('div');
-        itemCard.className = 'bg-stone-50 border border-stone-200 rounded-md overflow-hidden hover:border-stone-400 transition cursor-pointer flex flex-col group p-1 space-y-0.5';
+        // 加大 padding 並確保內文不被溢出裁切
+        itemCard.className = 'bg-stone-50 border border-stone-200 rounded-lg overflow-hidden hover:border-stone-400 transition cursor-pointer flex flex-col group p-1.5 space-y-1';
         itemCard.onclick = () => openVideoModal(item.id);
 
         itemCard.innerHTML = `
-          <div class="relative w-full aspect-[9/16] bg-stone-900 rounded overflow-hidden">
+          <div class="relative w-full aspect-[9/16] bg-stone-900 rounded overflow-hidden flex-shrink-0">
             <img src="${item.thumbnail}" class="w-full h-full object-cover group-hover:scale-105 transition">
             <div class="absolute inset-0 bg-stone-950/20 group-hover:bg-stone-950/10 flex items-center justify-center">
-              <i class="fa-brands fa-youtube text-red-600 text-xs group-hover:scale-110 transition"></i>
+              <i class="fa-brands fa-youtube text-red-600 text-sm group-hover:scale-110 transition"></i>
             </div>
           </div>
-          <div class="text-[10px] font-bold text-stone-700 truncate text-center leading-tight">
+          <div class="text-[11px] font-bold text-stone-700 truncate text-center leading-normal py-0.5">
             ${item.person}
           </div>
         `;
