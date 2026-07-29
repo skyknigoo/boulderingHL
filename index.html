@@ -124,38 +124,44 @@
       </section>
 
       <!-- 影片卡片網格 -->
-      <section id="video-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6"></section>
+      <section id="video-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-4 gap-4 sm:gap-6"></section>
     </section>
 
   </main>
 
   <!-- 大視窗 Modal -->
   <div id="video-modal" class="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5 transition-all duration-300">
-    <div id="modal-container" class="bg-white border border-stone-200 rounded-2xl overflow-hidden max-w-4xl w-full h-[90vh] shadow-2xl relative flex flex-col">
+    <div id="modal-container" class="bg-white border border-stone-200 rounded-2xl overflow-hidden max-w-4xl w-full max-h-[92vh] shadow-2xl relative flex flex-col">
       
-      <!-- 頂部標題 -->
-      <div class="p-3.5 sm:p-4 border-b border-stone-100 flex justify-between items-center bg-stone-50/90 flex-shrink-0">
-        <div id="modal-title" class="font-black text-stone-800 text-base sm:text-xl truncate">影片播放</div>
-        <button onclick="closeVideoModal()" class="text-stone-400 hover:text-stone-700 p-1.5 rounded-xl hover:bg-stone-100 transition">
-          <i class="fa-solid fa-xmark text-2xl"></i>
-        </button>
+      <!-- 頂部標籤與按鈕 -->
+      <div class="p-3 sm:p-3.5 border-b border-stone-100 flex justify-between items-center bg-stone-50/90 flex-shrink-0 gap-2">
+        <div id="modal-tags-header" class="flex flex-wrap items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-bold overflow-hidden pr-2">
+          <!-- JS 動態插入標籤 -->
+        </div>
+        
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <a id="modal-yt-link" href="#" target="_blank" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 px-3 py-1 rounded-lg text-xs sm:text-sm font-bold flex items-center gap-1 transition">
+            <span>YouTube 開啟</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-xs"></i>
+          </a>
+          <button onclick="closeVideoModal()" class="text-stone-400 hover:text-stone-700 p-1 rounded-xl hover:bg-stone-100 transition">
+            <i class="fa-solid fa-xmark text-2xl"></i>
+          </button>
+        </div>
       </div>
 
-      <!-- 直式高聳 9:16 播放區 -->
-      <div class="relative w-full bg-black flex-1 flex items-center justify-center overflow-hidden min-h-0">
+      <!-- 主影片播放區 -->
+      <div class="relative w-full bg-black flex-1 flex items-center justify-center overflow-hidden min-h-0 max-h-[58vh]">
         <iframe id="modal-iframe" src="" class="h-full aspect-[9/16] border-0 shadow-lg" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
       </div>
 
-      <!-- 屬性標籤列 -->
-      <div id="modal-footer" class="p-3 sm:p-4 bg-stone-50 border-t border-stone-100 text-xs sm:text-sm text-stone-700 flex flex-wrap gap-2.5 items-center justify-between flex-shrink-0"></div>
-
-      <!-- 💡 精緻縮小版的「同場館同路線影片」區 (欄數增加到 8~10 欄) -->
-<div class="p-3 bg-white border-t border-stone-100 space-y-2 overflow-y-auto custom-scrollbar max-h-52 flex-shrink-0">
-  <h4 class="text-xs font-extrabold text-stone-800 flex items-center gap-1.5">
-    <i class="fa-solid fa-users-viewfinder text-stone-500 text-sm"></i> 同場館同路線影片：
-  </h4>
-  <div id="same-route-grid" class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-2.5"></div>
-</div>
+      <!-- 同場館同路線影片區 -->
+      <div class="p-3.5 bg-white border-t border-stone-100 space-y-2.5 overflow-y-auto custom-scrollbar max-h-80 flex-shrink-0">
+        <h4 class="text-xs sm:text-sm font-extrabold text-stone-800 flex items-center gap-1.5">
+          <i class="fa-solid fa-users-viewfinder text-stone-500 text-sm"></i> 同場館同路線影片：
+        </h4>
+        <div id="same-route-grid" class="grid grid-cols-3 sm:grid-cols-5 md:grid-cols-6 gap-2.5 pb-2"></div>
+      </div>
     </div>
   </div>
 
@@ -174,23 +180,25 @@
         id: "mock_pl_1",
         snippet: {
           title: "20260726 B-Plus(太原店)",
-          thumbnails: { high: { url: "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=500" } }
+          thumbnails: { high: { url: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" } }
         }
       },
       {
         id: "mock_pl_2",
         snippet: {
           title: "20260719 攀呐",
-          thumbnails: { high: { url: "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=500" } }
+          thumbnails: { high: { url: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" } }
         }
       }
     ];
 
     const MOCK_VIDEOS = [
-      { id: "dQw4w9WgXcQ", name: "2F 黃石 挑戰 嘉", date: "20260726", gymName: "B-Plus(太原店)", thumbnail: "https://images.unsplash.com/photo-1522163182402-834f871fd851?w=500" },
-      { id: "dQw4w9WgXcQ", name: "2F 黃石 挑戰 峰", date: "20260726", gymName: "B-Plus(太原店)", thumbnail: "https://images.unsplash.com/photo-1564769625905-50e93615e769?w=500" },
-      { id: "dQw4w9WgXcQ", name: "1F 藍石2 挑戰 Irene", date: "20260726", gymName: "B-Plus(太原店)", thumbnail: "https://images.unsplash.com/photo-1578873376229-37f2fa8830bd?w=500" },
-      { id: "dQw4w9WgXcQ", name: "C面 桃石 V1 嘉", date: "20260719", gymName: "攀呐", thumbnail: "https://images.unsplash.com/photo-1516592673884-4a382d7724f9?w=500" }
+      { id: "dQw4w9WgXcQ", name: "1F 藍石2 挑戰 嘉", date: "20260726", gymName: "B-Plus(太原店)", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" },
+      { id: "dQw4w9WgXcQ", name: "1F 藍石2 挑戰 Irene", date: "20260726", gymName: "B-Plus(太原店)", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" },
+      { id: "dQw4w9WgXcQ", name: "1F 藍石2 挑戰 峰", date: "20260726", gymName: "B-Plus(太原店)", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" },
+      { id: "dQw4w9WgXcQ", name: "1F 藍石2 挑戰 MoTang", date: "20260726", gymName: "B-Plus(太原店)", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" },
+      { id: "dQw4w9WgXcQ", name: "2F 黃石 挑戰 嘉", date: "20260726", gymName: "B-Plus(太原店)", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" },
+      { id: "dQw4w9WgXcQ", name: "C面 桃石 V1 嘉", date: "20260719", gymName: "攀呐", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" }
     ];
 
     let allPlaylists = [];
@@ -366,7 +374,7 @@
           </div>
         </div>
         <div class="p-2">
-          <p class="text-[11px] font-bold text-stone-800 line-clamp-1">${title}</p>
+          <p class="text-xs font-bold text-stone-800 line-clamp-1">${title}</p>
         </div>
       `;
       container.appendChild(card);
@@ -545,6 +553,7 @@
       renderVideoGrid();
     }
 
+    // 💡 渲染卡片區塊：加大標題（text-base font-black）與屬性 Tag（text-xs px-2.5 py-1）
     function renderVideoGrid() {
       const grid = document.getElementById('video-grid');
       grid.innerHTML = '';
@@ -589,25 +598,28 @@
                 <i class="fa-solid fa-play text-sm ml-0.5"></i>
               </div>
             </div>
-            <div class="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-md text-stone-700 text-[11px] font-bold px-2.5 py-0.5 rounded-lg border border-stone-200/80 shadow-sm">
+            <!-- 加大牆面標籤 -->
+            <div class="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md text-stone-800 text-xs font-black px-2.5 py-1 rounded-lg border border-stone-200/80 shadow-sm">
               ${video.wall}
             </div>
           </div>
 
-          <div class="p-3.5 flex-1 flex flex-col justify-between space-y-2.5">
+          <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
             <div>
-              <div class="text-[11px] text-stone-400 font-bold flex items-center gap-1 mb-1">
+              <div class="text-xs text-stone-400 font-bold flex items-center gap-1 mb-1.5">
                 <i class="fa-solid fa-calendar-days"></i> ${video.date}
               </div>
-              <h3 class="font-extrabold text-stone-800 text-sm line-clamp-1 group-hover:text-stone-900 transition" title="${video.fullName}">
+              <!-- 💡 加大影片標題（text-base font-black） -->
+              <h3 class="font-black text-stone-800 text-base line-clamp-1 group-hover:text-red-600 transition" title="${video.fullName}">
                 ${video.fullName}
               </h3>
             </div>
 
+            <!-- 💡 加大屬性 Tag 標籤（text-xs px-2.5 py-1） -->
             <div class="flex flex-wrap gap-1.5 pt-0.5">
-              <span class="text-[10px] px-2 py-0.5 rounded-md border ${badgeStyle} font-bold">${video.color}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-md border bg-stone-100 text-stone-700 border-stone-200 font-bold">${video.difficulty}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-md border bg-stone-100 text-stone-800 border-stone-200 font-bold">${video.person}</span>
+              <span class="text-xs px-2.5 py-1 rounded-md border ${badgeStyle} font-bold shadow-xs">${video.color}</span>
+              <span class="text-xs px-2.5 py-1 rounded-md border bg-stone-100 text-stone-700 border-stone-200 font-bold shadow-xs">${video.difficulty}</span>
+              <span class="text-xs px-2.5 py-1 rounded-md border bg-stone-100 text-stone-800 border-stone-200 font-bold shadow-xs">${video.person}</span>
             </div>
           </div>
         `;
@@ -619,22 +631,18 @@
       const video = parsedVideoList.find(v => v.id === id);
       if (!video) return;
 
-      document.getElementById('modal-title').innerText = video.fullName;
       document.getElementById('modal-iframe').src = video.embedUrl;
-      
-      const footer = document.getElementById('modal-footer');
+      document.getElementById('modal-yt-link').href = `https://www.youtube.com/watch?v=${video.id}`;
+
+      const tagsHeader = document.getElementById('modal-tags-header');
       const badgeStyle = colorStyleMap[video.color] || 'bg-stone-100 text-stone-700 border-stone-200';
 
-      footer.innerHTML = `
-        <div class="flex flex-wrap gap-2 items-center text-xs sm:text-sm font-bold">
-          <span class="bg-stone-200/80 text-stone-800 px-3 py-1 rounded-lg">${video.gymName} (${video.date})</span>
-          <span class="px-3 py-1 rounded-lg border ${badgeStyle}">${video.color}</span>
-          <span class="bg-stone-100 text-stone-700 px-3 py-1 rounded-lg border border-stone-200">${video.difficulty}</span>
-          <span class="bg-stone-200/80 text-stone-800 px-3 py-1 rounded-lg">${video.person}</span>
-        </div>
-        <a href="https://www.youtube.com/watch?v=${video.id}" target="_blank" class="text-red-600 hover:text-red-700 font-bold text-xs sm:text-sm flex items-center gap-1 underline ml-auto">
-          YouTube 開啟 <i class="fa-solid fa-arrow-up-right-from-square"></i>
-        </a>
+      tagsHeader.innerHTML = `
+        <span class="bg-stone-100 text-stone-800 px-3 py-1 rounded-lg border border-stone-200">${video.gymName} (${video.date})</span>
+        <span class="bg-stone-100 text-stone-700 px-3 py-1 rounded-lg border border-stone-200">${video.wall}</span>
+        <span class="px-3 py-1 rounded-lg border ${badgeStyle}">${video.color}</span>
+        <span class="bg-stone-100 text-stone-700 px-3 py-1 rounded-lg border border-stone-200">${video.difficulty}</span>
+        <span class="bg-stone-200/80 text-stone-800 px-3 py-1 rounded-lg">${video.person}</span>
       `;
 
       renderSameRouteVideos(video);
@@ -642,23 +650,45 @@
     }
 
     function openVideoModalDirectly(videoId, title, gymName) {
-      document.getElementById('modal-title').innerText = title;
       document.getElementById('modal-iframe').src = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-      document.getElementById('modal-footer').innerHTML = `<span class="text-xs sm:text-sm font-bold text-stone-600">${gymName}</span>`;
-      document.getElementById('same-route-grid').innerHTML = `<div class="col-span-full text-stone-400 text-xs italic py-1">請進入場館頁面查看比較影片。</div>`;
+      document.getElementById('modal-yt-link').href = `https://www.youtube.com/watch?v=${videoId}`;
+      
+      const targetVideo = MOCK_VIDEOS.find(v => v.id === videoId && v.gymName === gymName) || {
+        wall: '1F',
+        color: '藍石2',
+        difficulty: '挑戰',
+        person: '嘉',
+        date: '20260726',
+        gymName: gymName,
+        id: videoId
+      };
+
+      const parsedTarget = parseFileNameAndPath(targetVideo);
+      const badgeStyle = colorStyleMap[parsedTarget.color] || 'bg-stone-100 text-stone-700 border-stone-200';
+
+      document.getElementById('modal-tags-header').innerHTML = `
+        <span class="bg-stone-100 text-stone-800 px-3 py-1 rounded-lg border border-stone-200">${parsedTarget.gymName} (${parsedTarget.date})</span>
+        <span class="bg-stone-100 text-stone-700 px-3 py-1 rounded-lg border border-stone-200">${parsedTarget.wall}</span>
+        <span class="px-3 py-1 rounded-lg border ${badgeStyle}">${parsedTarget.color}</span>
+        <span class="bg-stone-100 text-stone-700 px-3 py-1 rounded-lg border border-stone-200">${parsedTarget.difficulty}</span>
+        <span class="bg-stone-200/80 text-stone-800 px-3 py-1 rounded-lg">${parsedTarget.person}</span>
+      `;
+
+      const sourceList = parsedVideoList.length > 0 ? parsedVideoList : MOCK_VIDEOS.map(v => parseFileNameAndPath(v));
+      renderSameRouteVideos(parsedTarget, sourceList);
+
       document.getElementById('video-modal').classList.remove('hidden');
     }
 
-    // 💡 渲染迷你精致版的同路線影片卡片
-    function renderSameRouteVideos(currentVideo) {
+    function renderSameRouteVideos(currentVideo, sourceList = parsedVideoList) {
       const grid = document.getElementById('same-route-grid');
       grid.innerHTML = '';
 
-      const sameRoute = parsedVideoList.filter(v => 
+      const sameRoute = sourceList.filter(v => 
         v.wall === currentVideo.wall &&
         v.color === currentVideo.color &&
         v.difficulty === currentVideo.difficulty &&
-        v.id !== currentVideo.id
+        v.person !== currentVideo.person
       );
 
       if (sameRoute.length === 0) {
@@ -668,7 +698,6 @@
 
       sameRoute.forEach(item => {
         const itemCard = document.createElement('div');
-        // 加大 padding 並確保內文不被溢出裁切
         itemCard.className = 'bg-stone-50 border border-stone-200 rounded-lg overflow-hidden hover:border-stone-400 transition cursor-pointer flex flex-col group p-1.5 space-y-1';
         itemCard.onclick = () => openVideoModal(item.id);
 
