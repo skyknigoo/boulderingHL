@@ -198,7 +198,7 @@
       { id: "dQw4w9WgXcQ", name: "1F 藍石2 挑戰 峰", date: "20260726", gymName: "B-Plus(太原店)", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" },
       { id: "dQw4w9WgXcQ", name: "1F 藍石2 挑戰 MoTang", date: "20260726", gymName: "B-Plus(太原店)", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" },
       { id: "dQw4w9WgXcQ", name: "2F 黃石 挑戰 嘉", date: "20260726", gymName: "B-Plus(太原店)", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" },
-      { id: "dQw4w9WgXcQ", name: "C面 桃石 V1 嘉", date: "20260719", gymName: "攀呐", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" }
+      { id: "dQw4w9WgXcQ", name: "C面 桃石 v1 嘉", date: "20260719", gymName: "攀呐", thumbnail: "https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg" }
     ];
 
     let allPlaylists = [];
@@ -428,8 +428,13 @@
 
       const wall = parts[0] || '未分類牆面';
       const color = parts[1] || '未分類顏色';
-      const difficulty = parts[2] || '未分類難度';
       
+      // 💡 難度處理：若包含英文，自動轉為大寫英文
+      let difficulty = parts[2] || '未分類難度';
+      if (/[a-zA-Z]/.test(difficulty)) {
+        difficulty = difficulty.toUpperCase();
+      }
+
       let person = parts[3] || '未指定人名';
       if (person.toLowerCase() === 'irene') person = 'Irene';
 
